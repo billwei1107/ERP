@@ -1,0 +1,92 @@
+const fs = require('fs');
+const path = require('path');
+
+const schema = `// This is your Prisma schema file
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------
+// User Management
+// --------------------------------------
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attendances Attendance[]
+  todos       Todo[]
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+// --------------------------------------
+// Dashboard: Attendance
+// --------------------------------------
+model Attendance {
+  id        Int            @id @default(autoincrement())
+  userId    Int
+  type      AttendanceType
+  time      DateTime       @default(now())
+  date      DateTime       @db.Date
+  
+  user      User           @relation(fields: [userId], references: [id])
+}
+
+enum AttendanceType {
+  CLOCK_IN
+  CLOCK_OUT
+}
+
+// --------------------------------------
+// Dashboard: Todo / Reminders
+// --------------------------------------
+model Todo {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  dueAt       DateTime?
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+// --------------------------------------
+// Inventory Management
+// --------------------------------------
+model Product {
+  id            Int      @id @default(autoincrement())
+  sku           String   @unique
+  name          String
+  category      String?
+  stockQuantity Int      @default(0)
+  minStockLevel Int      @default(10)
+  unit          String?  @default("個")
+  price         Decimal  @default(0.0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+`;
+
+// Write to prisma/schema.prisma relative to script location
+const targetPath = path.join(__dirname, 'prisma', 'schema.prisma');
+fs.writeFileSync(targetPath, schema, 'utf8');
+console.log('schema.prisma created successfully at ' + targetPath);

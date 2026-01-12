@@ -1,0 +1,87 @@
+/**
+ * @file Button.css
+ * @description 按鈕樣式定義 / Button Styles
+ */
+
+.erp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.erp-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Variants */
+.erp-btn--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.erp-btn--primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
+
+.erp-btn--secondary {
+    background-color: #fff;
+    border-color: var(--border-light);
+    color: var(--text-main);
+}
+
+.erp-btn--secondary:hover:not(:disabled) {
+    background-color: var(--bg-body);
+    border-color: var(--text-light);
+}
+
+.erp-btn--outline {
+    background-color: transparent;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.erp-btn--outline:hover:not(:disabled) {
+    background-color: rgba(0, 102, 204, 0.05);
+}
+
+.erp-btn--ghost {
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+.erp-btn--ghost:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-main);
+}
+
+/* Sizes */
+.erp-btn--sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    height: 32px;
+}
+
+.erp-btn--md {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    height: 40px;
+}
+
+.erp-btn--lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.125rem;
+    height: 48px;
+}
+
+.erp-btn--full-width {
+    width: 100%;
+    display: flex;
+}

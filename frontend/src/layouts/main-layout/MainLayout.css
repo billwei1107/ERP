@@ -1,0 +1,92 @@
+/**
+ * @file MainLayout.css
+ * @description 主版面樣式 / Main Layout Styles
+ */
+
+.erp-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--bg-body);
+}
+
+.erp-sidebar {
+    width: 260px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+}
+
+.erp-sidebar__header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.erp-sidebar__header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.erp-sidebar__nav {
+    flex: 1;
+    padding: 1rem;
+}
+
+.erp-sidebar__item {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.25rem;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.erp-sidebar__item:hover {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+}
+
+.erp-sidebar__item.active {
+    background-color: rgba(0, 102, 204, 0.08);
+    /* Primary color with opacity */
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.erp-sidebar__footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.erp-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.erp-header {
+    height: 64px;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+}
+
+.erp-main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.w-full {
+    width: 100%;
+}
