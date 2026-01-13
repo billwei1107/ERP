@@ -1,0 +1,277 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "sku": "PROD-001",
+      "name": "無線滑鼠",
+      "category": "3C周邊",
+      "unit": "個",
+      "safetyStock": 10,
+      "currentStock": 47,
+      "location": "A-01"
+    },
+    {
+      "id": 2,
+      "sku": "PROD-002",
+      "name": "機械鍵盤",
+      "category": "3C周邊",
+      "unit": "把",
+      "safetyStock": 5,
+      "currentStock": 12,
+      "location": "A-02"
+    },
+    {
+      "id": 3,
+      "sku": "OFF-001",
+      "name": "A4影印紙",
+      "category": "辦公用品",
+      "unit": "箱",
+      "safetyStock": 20,
+      "currentStock": 8,
+      "location": "B-01"
+    },
+    {
+      "id": 4,
+      "safetyStock": 10,
+      "currentStock": 0,
+      "unit": "個",
+      "sku": "PROD-001",
+      "name": "無線滑鼠",
+      "category": "\t3C周邊",
+      "location": "\tA-02"
+    }
+  ],
+  "movements": [
+    {
+      "id": 3841,
+      "productId": 1,
+      "type": "IN",
+      "quantity": 1,
+      "reason": "",
+      "date": "2026-01-12T19:08:31.181Z"
+    },
+    {
+      "id": 8039,
+      "productId": 1,
+      "type": "IN",
+      "quantity": 1,
+      "reason": "盤點調整 (單號: 1768244695523)",
+      "date": "2026-01-12T19:05:01.888Z"
+    }
+  ],
+  "stockTakes": [
+    {
+      "id": 1768245319215,
+      "date": "2026-01-12T19:15:19.215Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 47,
+          "actualStock": 47,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 3,
+          "productName": "A4影印紙",
+          "sku": "OFF-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0,
+          "location": "B-01"
+        },
+        {
+          "productId": 4,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 0,
+          "actualStock": 0,
+          "difference": 0,
+          "location": "\tA-02"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768245215588,
+      "date": "2026-01-12T19:13:35.588Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 47,
+          "actualStock": 47,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 3,
+          "productName": "A4影印紙",
+          "sku": "OFF-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0,
+          "location": "B-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768245060577,
+      "date": "2026-01-12T19:11:00.577Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 47,
+          "actualStock": 47,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 3,
+          "productName": "A4影印紙",
+          "sku": "OFF-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0,
+          "location": "B-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768244951414,
+      "date": "2026-01-12T19:09:11.414Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 47,
+          "actualStock": 47,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 3,
+          "productName": "A4影印紙",
+          "sku": "OFF-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0,
+          "location": "B-01"
+        }
+      ],
+      "note": "3"
+    },
+    {
+      "id": 1768244695523,
+      "date": "2026-01-12T19:04:55.523Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 45,
+          "actualStock": 46,
+          "difference": 1
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0
+        },
+        {
+          "productId": 3,
+          "productName": "A4影印紙",
+          "sku": "OFF-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0
+        }
+      ],
+      "note": "2"
+    },
+    {
+      "id": 1768244660898,
+      "date": "2026-01-12T19:04:20.898Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "無線滑鼠",
+          "sku": "PROD-001",
+          "systemStock": 45,
+          "actualStock": 45,
+          "difference": 0
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0
+        },
+        {
+          "productId": 3,
+          "productName": "A4影印紙",
+          "sku": "OFF-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0
+        }
+      ],
+      "note": "1"
+    }
+  ]
+}

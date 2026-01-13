@@ -1,0 +1,811 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "sku": "PROD-003",
+      "name": "test",
+      "category": "3C周邊",
+      "unit": "個",
+      "safetyStock": 10,
+      "totalStock": 5,
+      "locations": [
+        {
+          "location": "A-02",
+          "quantity": 5
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "sku": "PROD-002",
+      "name": "機械鍵盤",
+      "category": "3C周邊",
+      "unit": "把",
+      "safetyStock": 5,
+      "totalStock": 22,
+      "locations": [
+        {
+          "location": "A-02",
+          "quantity": 11
+        },
+        {
+          "location": "A-01",
+          "quantity": 10
+        },
+        {
+          "location": "C-01",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "sku": "PROD-001",
+      "name": "1",
+      "category": "3C周邊",
+      "unit": "個",
+      "safetyStock": 10,
+      "totalStock": 1,
+      "locations": [
+        {
+          "location": "A-01",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "sku": "ACC-001",
+      "name": "USB-C 傳輸線",
+      "category": "3C周邊",
+      "unit": "條",
+      "safetyStock": 10,
+      "totalStock": 12,
+      "locations": [
+        {
+          "location": "B-02",
+          "quantity": 12
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "sku": "ACC-002",
+      "name": "手機支架",
+      "category": "3C周邊",
+      "unit": "個",
+      "safetyStock": 10,
+      "totalStock": 97,
+      "locations": [
+        {
+          "location": "A-03",
+          "quantity": 97
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "sku": "ACC-003",
+      "name": "HDMI 線 2M",
+      "category": "3C周邊",
+      "unit": "條",
+      "safetyStock": 10,
+      "totalStock": 74,
+      "locations": [
+        {
+          "location": "B-01",
+          "quantity": 14
+        },
+        {
+          "location": "A-03",
+          "quantity": 60
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "sku": "AUD-001",
+      "name": "藍芽耳機",
+      "category": "3C周邊",
+      "unit": "個",
+      "safetyStock": 10,
+      "totalStock": 8,
+      "locations": [
+        {
+          "location": "C-01",
+          "quantity": 8
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "sku": "PER-005",
+      "name": "電競滑鼠",
+      "category": "電競設備",
+      "unit": "個",
+      "safetyStock": 10,
+      "totalStock": 81,
+      "locations": [
+        {
+          "location": "B-01",
+          "quantity": 76
+        },
+        {
+          "location": "B-02",
+          "quantity": 5
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "sku": "PER-006",
+      "name": "機械鍵盤青軸",
+      "category": "電競設備",
+      "unit": "把",
+      "safetyStock": 10,
+      "totalStock": 65,
+      "locations": [
+        {
+          "location": "C-02",
+          "quantity": 23
+        },
+        {
+          "location": "A-03",
+          "quantity": 42
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "sku": "CLN-001",
+      "name": "螢幕清潔組",
+      "category": "清潔用品",
+      "unit": "組",
+      "safetyStock": 10,
+      "totalStock": 174,
+      "locations": [
+        {
+          "location": "A-03",
+          "quantity": 80
+        },
+        {
+          "location": "C-02",
+          "quantity": 55
+        },
+        {
+          "location": "B-02",
+          "quantity": 39
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "sku": "OFF-001",
+      "name": "筆記本",
+      "category": "辦公用品",
+      "unit": "本",
+      "safetyStock": 10,
+      "totalStock": 185,
+      "locations": [
+        {
+          "location": "A-03",
+          "quantity": 60
+        },
+        {
+          "location": "C-01",
+          "quantity": 73
+        },
+        {
+          "location": "B-02",
+          "quantity": 52
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "sku": "OFF-002",
+      "name": "原子筆(黑)",
+      "category": "辦公用品",
+      "unit": "支",
+      "safetyStock": 10,
+      "totalStock": 187,
+      "locations": [
+        {
+          "location": "B-01",
+          "quantity": 88
+        },
+        {
+          "location": "A-03",
+          "quantity": 5
+        },
+        {
+          "location": "C-01",
+          "quantity": 94
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "sku": "OFF-003",
+      "name": "文件夾",
+      "category": "辦公用品",
+      "unit": "個",
+      "safetyStock": 10,
+      "totalStock": 46,
+      "locations": [
+        {
+          "location": "B-01",
+          "quantity": 15
+        },
+        {
+          "location": "C-02",
+          "quantity": 31
+        }
+      ]
+    }
+  ],
+  "movements": [
+    {
+      "id": 2194,
+      "productId": 2,
+      "type": "TRANSFER",
+      "quantity": 1,
+      "reason": "",
+      "fromLocation": "A-02",
+      "toLocation": "C-01",
+      "date": "2026-01-13T06:05:49.795Z"
+    },
+    {
+      "id": 2743,
+      "productId": 2,
+      "type": "IN",
+      "quantity": 10,
+      "reason": "",
+      "toLocation": "A-01",
+      "date": "2026-01-13T04:07:49.723Z"
+    },
+    {
+      "id": 2751,
+      "productId": 1,
+      "type": "IN",
+      "quantity": 2,
+      "reason": "",
+      "toLocation": " A-02",
+      "date": "2026-01-13T04:03:57.236Z"
+    }
+  ],
+  "stockTakes": [
+    {
+      "id": 1768284378679,
+      "date": "2026-01-13T06:06:18.679Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 11,
+          "actualStock": 11,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "C-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 4,
+          "productName": "USB-C 傳輸線",
+          "sku": "ACC-001",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "B-02"
+        },
+        {
+          "productId": 5,
+          "productName": "手機支架",
+          "sku": "ACC-002",
+          "systemStock": 97,
+          "actualStock": 97,
+          "difference": 0,
+          "location": "A-03"
+        },
+        {
+          "productId": 6,
+          "productName": "HDMI 線 2M",
+          "sku": "ACC-003",
+          "systemStock": 14,
+          "actualStock": 14,
+          "difference": 0,
+          "location": "B-01"
+        },
+        {
+          "productId": 6,
+          "productName": "HDMI 線 2M",
+          "sku": "ACC-003",
+          "systemStock": 60,
+          "actualStock": 60,
+          "difference": 0,
+          "location": "A-03"
+        },
+        {
+          "productId": 7,
+          "productName": "藍芽耳機",
+          "sku": "AUD-001",
+          "systemStock": 8,
+          "actualStock": 8,
+          "difference": 0,
+          "location": "C-01"
+        },
+        {
+          "productId": 8,
+          "productName": "電競滑鼠",
+          "sku": "PER-005",
+          "systemStock": 76,
+          "actualStock": 76,
+          "difference": 0,
+          "location": "B-01"
+        },
+        {
+          "productId": 8,
+          "productName": "電競滑鼠",
+          "sku": "PER-005",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "B-02"
+        },
+        {
+          "productId": 9,
+          "productName": "機械鍵盤青軸",
+          "sku": "PER-006",
+          "systemStock": 23,
+          "actualStock": 23,
+          "difference": 0,
+          "location": "C-02"
+        },
+        {
+          "productId": 9,
+          "productName": "機械鍵盤青軸",
+          "sku": "PER-006",
+          "systemStock": 42,
+          "actualStock": 42,
+          "difference": 0,
+          "location": "A-03"
+        },
+        {
+          "productId": 10,
+          "productName": "螢幕清潔組",
+          "sku": "CLN-001",
+          "systemStock": 80,
+          "actualStock": 80,
+          "difference": 0,
+          "location": "A-03"
+        },
+        {
+          "productId": 10,
+          "productName": "螢幕清潔組",
+          "sku": "CLN-001",
+          "systemStock": 55,
+          "actualStock": 55,
+          "difference": 0,
+          "location": "C-02"
+        },
+        {
+          "productId": 10,
+          "productName": "螢幕清潔組",
+          "sku": "CLN-001",
+          "systemStock": 39,
+          "actualStock": 39,
+          "difference": 0,
+          "location": "B-02"
+        },
+        {
+          "productId": 11,
+          "productName": "筆記本",
+          "sku": "OFF-001",
+          "systemStock": 60,
+          "actualStock": 60,
+          "difference": 0,
+          "location": "A-03"
+        },
+        {
+          "productId": 11,
+          "productName": "筆記本",
+          "sku": "OFF-001",
+          "systemStock": 73,
+          "actualStock": 73,
+          "difference": 0,
+          "location": "C-01"
+        },
+        {
+          "productId": 11,
+          "productName": "筆記本",
+          "sku": "OFF-001",
+          "systemStock": 52,
+          "actualStock": 52,
+          "difference": 0,
+          "location": "B-02"
+        },
+        {
+          "productId": 12,
+          "productName": "原子筆(黑)",
+          "sku": "OFF-002",
+          "systemStock": 88,
+          "actualStock": 88,
+          "difference": 0,
+          "location": "B-01"
+        },
+        {
+          "productId": 12,
+          "productName": "原子筆(黑)",
+          "sku": "OFF-002",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-03"
+        },
+        {
+          "productId": 12,
+          "productName": "原子筆(黑)",
+          "sku": "OFF-002",
+          "systemStock": 94,
+          "actualStock": 94,
+          "difference": 0,
+          "location": "C-01"
+        },
+        {
+          "productId": 13,
+          "productName": "文件夾",
+          "sku": "OFF-003",
+          "systemStock": 15,
+          "actualStock": 15,
+          "difference": 0,
+          "location": "B-01"
+        },
+        {
+          "productId": 13,
+          "productName": "文件夾",
+          "sku": "OFF-003",
+          "systemStock": 31,
+          "actualStock": 31,
+          "difference": 0,
+          "location": "C-02"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768278535751,
+      "date": "2026-01-13T04:28:55.751Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768278183612,
+      "date": "2026-01-13T04:23:03.612Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768277714304,
+      "date": "2026-01-13T04:15:14.304Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768277703405,
+      "date": "2026-01-13T04:15:03.405Z",
+      "status": "IN_PROGRESS",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768277669522,
+      "date": "2026-01-13T04:14:29.522Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768277283116,
+      "date": "2026-01-13T04:08:03.116Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 10,
+          "actualStock": 10,
+          "difference": 0,
+          "location": "A-01"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": 1768277233174,
+      "date": "2026-01-13T04:07:13.174Z",
+      "status": "COMPLETED",
+      "items": [
+        {
+          "productId": 1,
+          "productName": "test",
+          "sku": "PROD-003",
+          "systemStock": 5,
+          "actualStock": 5,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 2,
+          "productName": "機械鍵盤",
+          "sku": "PROD-002",
+          "systemStock": 12,
+          "actualStock": 12,
+          "difference": 0,
+          "location": "A-02"
+        },
+        {
+          "productId": 3,
+          "productName": "1",
+          "sku": "PROD-001",
+          "systemStock": 1,
+          "actualStock": 1,
+          "difference": 0,
+          "location": "A-01"
+        }
+      ],
+      "note": ""
+    }
+  ]
+}

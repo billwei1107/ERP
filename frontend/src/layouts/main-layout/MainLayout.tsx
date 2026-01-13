@@ -9,25 +9,75 @@ import React from 'react';
 import './MainLayout.css';
 import { Button } from '../../components/ui/button';
 
+import { useAuth } from '../../lib/auth-context';
+import { useNavigate } from 'react-router-dom';
+
 interface MainLayoutProps {
     children: React.ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+    const { user, isAdmin, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     return (
         <div className="erp-layout">
             <aside className="erp-sidebar">
                 <div className="erp-sidebar__header">
                     <h2>ERP 管理系統</h2>
+                    <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '0.25rem' }}>
+                        {user?.name} ({user?.role})
+                    </div>
                 </div>
                 <nav className="erp-sidebar__nav">
-                    {/* Navigation Items (To be implemented) */}
-                    <div className="erp-sidebar__item active">儀表板</div>
-                    <div className="erp-sidebar__item">庫存管理</div>
+                    <div
+                        className="erp-sidebar__item active"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/')}
+                    >
+                        儀表板
+                    </div>
+                    <div
+                        className={`erp-sidebar__item ${location.pathname === '/my-attendance' ? 'active' : ''}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/my-attendance')}
+                    >
+                        我的考勤
+                    </div>
+                    <div
+                        className={`erp-sidebar__item ${location.pathname.startsWith('/inventory') ? 'active' : ''}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/inventory')}
+                    >
+                        庫存管理
+                    </div>
                     <div className="erp-sidebar__item">財務管理</div>
+                    {isAdmin && (
+                        <>
+                            <div
+                                className="erp-sidebar__item"
+                                style={{ color: 'var(--color-primary)', fontWeight: 600, cursor: 'pointer' }}
+                                onClick={() => navigate('/admin/accounts')}
+                            >
+                                帳號管理
+                            </div>
+                            <div
+                                className="erp-sidebar__item"
+                                style={{ color: 'var(--color-primary)', fontWeight: 600, cursor: 'pointer' }}
+                                onClick={() => navigate('/admin/attendance')}
+                            >
+                                考勤管理
+                            </div>
+                        </>
+                    )}
                 </nav>
                 <div className="erp-sidebar__footer">
-                    <Button variant="ghost" size="sm" className="w-full">
+                    <Button variant="ghost" size="sm" className="w-full" onClick={handleLogout}>
                         登出
                     </Button>
                 </div>

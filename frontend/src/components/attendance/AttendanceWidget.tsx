@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { request } from '../../lib/api';
+import { useAuth } from '../../lib/auth-context';
 import { Button } from '../ui/button';
 import styles from './AttendanceWidget.module.css';
 
@@ -9,14 +10,19 @@ interface AttendanceRecord {
     time: string;
 }
 
-export function AttendanceWidget() {
+interface Props {
+    onSuccess?: () => void;
+}
+
+export function AttendanceWidget({ onSuccess }: Props) {
     const [status, setStatus] = useState<AttendanceRecord[]>([]);
     const [loading, setLoading] = useState(false);
-    const userId = 1; // Hardcoded for now
+    const { user } = useAuth();
+    const userId = user?.id || 0;
 
     useEffect(() => {
-        loadStatus();
-    }, []);
+        if (userId) loadStatus();
+    }, [userId]);
 
     const loadStatus = async () => {
         try {
@@ -35,6 +41,7 @@ export function AttendanceWidget() {
                 body: JSON.stringify({ userId }),
             });
             await loadStatus();
+            onSuccess?.();
         } finally {
             setLoading(false);
         }
@@ -48,6 +55,7 @@ export function AttendanceWidget() {
                 body: JSON.stringify({ userId }),
             });
             await loadStatus();
+            onSuccess?.();
         } finally {
             setLoading(false);
         }

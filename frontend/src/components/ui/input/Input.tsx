@@ -12,21 +12,29 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
     fullWidth?: boolean;
+    endAdornment?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ className = '', label, error, fullWidth = false, ...props }, ref) => {
+    ({ className = '', label, error, fullWidth = false, endAdornment, ...props }, ref) => {
         const inputClasses = `erp-input ${error ? 'erp-input--error' : ''} ${className}`;
         const wrapperClasses = `erp-input-wrapper ${fullWidth ? 'w-full' : ''}`;
 
         return (
             <div className={wrapperClasses}>
                 {label && <label className="erp-input-label">{label}</label>}
-                <input
-                    ref={ref}
-                    className={inputClasses}
-                    {...props}
-                />
+                <div className="erp-input-group">
+                    <input
+                        ref={ref}
+                        className={inputClasses}
+                        {...props}
+                    />
+                    {endAdornment && (
+                        <div className="erp-input-adornment">
+                            {endAdornment}
+                        </div>
+                    )}
+                </div>
                 {error && <span className="erp-input-error">{error}</span>}
             </div>
         );

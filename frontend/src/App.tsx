@@ -5,11 +5,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './layouts/main-layout';
 import { LoginPage } from './pages/login';
-
-
+import { ProtectedRoute } from './lib/protected-route';
 import { DashboardPage } from './pages/dashboard';
-
-// ... (remove old Dashboard component if possible, or just ignore it)
+import { AccountManagement, AdminAttendance } from './pages/admin';
+import { MyAttendance } from './pages/attendance/MyAttendance';
+// import { ProductManagement } from './pages/inventory/ProductManagement';
+// import { InventoryMovements } from './pages/inventory/InventoryMovements';
+import { InventoryPage } from './pages/inventory/InventoryPage';
 
 function App() {
     return (
@@ -19,9 +21,43 @@ function App() {
 
                 {/* Protected Routes */}
                 <Route path="/" element={
-                    <MainLayout>
-                        <DashboardPage />
-                    </MainLayout>
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <DashboardPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+
+                {/* Admin Routes */}
+                <Route path="/admin/accounts" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <AccountManagement />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin/attendance" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <AdminAttendance />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/my-attendance" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <MyAttendance />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+
+                {/* Inventory Routes */}
+                <Route path="/inventory" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <InventoryPage />
+                        </MainLayout>
+                    </ProtectedRoute>
                 } />
 
                 {/* Redirect unknown routes to login */}

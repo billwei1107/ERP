@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { request } from '../../lib/api';
+import { useAuth } from '../../lib/auth-context';
 import { AttendanceWidget } from '../../components/attendance/AttendanceWidget';
+import { AdminAttendanceWidget } from '../../components/attendance/AdminAttendanceWidget';
 import { TodoWidget, Todo } from '../../components/todos/TodoWidget';
 import { InventoryWidget } from '../../components/inventory/InventoryWidget';
 import styles from './Dashboard.module.css';
@@ -8,10 +10,12 @@ import styles from './Dashboard.module.css';
 export function DashboardPage() {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [now, setNow] = useState(new Date()); // State to trigger re-renders for time-based updates
-    const userId = 1;
+    const { user, isAdmin } = useAuth();
+    const userId = user?.id || 0;
+    const [lastUpdate, setLastUpdate] = useState(0);
 
     useEffect(() => {
-        loadTodos();
+        if (userId) loadTodos();
 
         // Update 'now' every second to check for overdue items in real-time
         const timer = setInterval(() => {
@@ -19,7 +23,7 @@ export function DashboardPage() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [userId]);
 
     const loadTodos = async () => {
         try {
@@ -95,7 +99,12 @@ export function DashboardPage() {
 
             <div className={styles.grid}>
                 <div className={styles.sectionAttendance}>
-                    <AttendanceWidget />
+                    <AttendanceWidget onSuccess={() => setLastUpdate(Date.now())} />
+                    {isAdmin && (
+                        <div style={{ marginTop: '1.5rem' }}>
+                            <AdminAttendanceWidget refreshTrigger={lastUpdate} />
+                        </div>
+                    )}
                 </div>
                 <div className={styles.sectionTodos}>
                     <TodoWidget

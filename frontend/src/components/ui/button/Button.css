@@ -62,6 +62,16 @@
     color: var(--text-main);
 }
 
+.erp-btn--destructive {
+    background-color: var(--color-danger);
+    color: #fff;
+}
+
+.erp-btn--destructive:hover:not(:disabled) {
+    background-color: #dc2626;
+    /* Darker red */
+}
+
 /* Sizes */
 .erp-btn--sm {
     padding: 0.25rem 0.75rem;

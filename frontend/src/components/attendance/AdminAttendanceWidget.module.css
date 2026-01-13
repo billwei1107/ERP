@@ -1,0 +1,110 @@
+.widget {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    min-height: 300px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.badge {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    max-height: 320px;
+    /* Approx 5 items */
+    padding-right: 0.5rem;
+    /* Avoid scrollbar covering content */
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: var(--bg-body);
+    border-radius: var(--radius-md);
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.empId {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background-color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-light);
+}
+
+.name {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.online {
+    background-color: var(--color-success);
+}
+
+.offline {
+    background-color: var(--text-secondary);
+}
+
+.time {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.type {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.noRecord {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-style: italic;
+}

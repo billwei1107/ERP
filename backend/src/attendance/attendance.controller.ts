@@ -19,4 +19,22 @@ export class AttendanceController {
   getToday(@Query('userId') userId: string) {
     return this.attendanceService.getTodayStatus(Number(userId));
   }
+
+  @Get('all')
+  findAll() {
+    return this.attendanceService.findAll();
+  }
+
+  @Get('month')
+  getMonthly(
+    @Query('userId') userId: string,
+    @Query('year') year: string,
+    @Query('month') month: string,
+  ) {
+    return this.attendanceService.getMonthlyStatus(
+      userId ? +userId : undefined,
+      +year,
+      +month
+    );
+  }
 }

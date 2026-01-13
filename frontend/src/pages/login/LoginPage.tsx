@@ -10,18 +10,29 @@ import './LoginPage.css';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 
+import { useAuth } from '../../lib/auth-context';
+import { useNavigate } from 'react-router-dom';
+
 export const LoginPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [account, setAccount] = useState('admin@erp.com'); // Default for demo
+    const [password, setPassword] = useState('admin123');
+    const [showPassword, setShowPassword] = useState(false);
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            await login(account, password);
+            navigate('/');
+        } catch (err) {
+            console.error(err);
+            alert('登入失敗，請檢查帳號密碼');
+        } finally {
             setIsLoading(false);
-            alert('登入功能尚未串接 API');
-        }, 1500);
+        }
     };
 
     return (
@@ -38,13 +49,26 @@ export const LoginPage: React.FC = () => {
                         placeholder="請輸入員工編號或 Email"
                         fullWidth
                         required
+                        value={account}
+                        onChange={(e) => setAccount(e.target.value)}
                     />
                     <Input
                         label="密碼"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="請輸入密碼"
                         fullWidth
                         required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        endAdornment={
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                            >
+                                {showPassword ? '👁️' : '👁️‍🗨️'}
+                            </button>
+                        }
                     />
 
                     <div className="login-actions">
