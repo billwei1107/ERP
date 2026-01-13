@@ -65,6 +65,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     >
                         財務管理
                     </div>
+                    <div
+                        className={`erp-sidebar__item ${location.pathname.startsWith('/chat') ? 'active' : ''}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/chat')}
+                    >
+                        即時通訊
+                    </div>
 
                     {isAdmin && (
                         <>

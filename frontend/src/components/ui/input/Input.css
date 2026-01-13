@@ -23,7 +23,7 @@
     border-radius: var(--radius-md);
     font-size: 0.875rem;
     color: var(--text-main);
-    background-color: #fff;
+    background-color: var(--bg-card);
     transition: all 0.2s ease;
     outline: none;
 }
@@ -55,6 +55,7 @@
 .w-full {
     width: 100%;
 }
+
 .erp-input-group {
     position: relative;
     width: 100%;

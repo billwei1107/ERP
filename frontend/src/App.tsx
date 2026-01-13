@@ -13,6 +13,7 @@ import { MyAttendance } from './pages/attendance/MyAttendance';
 // import { InventoryMovements } from './pages/inventory/InventoryMovements';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { FinanceDashboard } from './pages/finance/FinanceDashboard';
+import { ChatPage } from './pages/chat/ChatPage';
 import { ProfileSettings } from './pages/settings/ProfileSettings';
 
 function App() {
@@ -67,6 +68,15 @@ function App() {
                     <ProtectedRoute>
                         <MainLayout>
                             <FinanceDashboard />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+
+                {/* Chat Route */}
+                <Route path="/chat" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <ChatPage />
                         </MainLayout>
                     </ProtectedRoute>
                 } />

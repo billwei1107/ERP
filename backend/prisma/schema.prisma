@@ -24,6 +24,21 @@ model User {
 
   attendances Attendance[]
   todos       Todo[]
+  
+  // Chat Relations
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  senderId   Int
+  receiverId Int
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
 
 enum Role {

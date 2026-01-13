@@ -1,0 +1,16 @@
+.chat-page-container {
+    height: calc(100vh - 80px);
+    /* Adjust based on header height, aiming to fill remaining space */
+    padding: 1.5rem;
+    overflow: hidden;
+}
+
+.chat-layout {
+    display: flex;
+    height: 100%;
+    background-color: var(--bg-card);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
