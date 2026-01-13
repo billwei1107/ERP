@@ -66,7 +66,14 @@ export const ChatPage: React.FC = () => {
                 setMessages(prev => [...prev, msg]);
             }
 
-            // TODO: Update lastMessage in UserList
+            // Update lastMessage in UserList
+            setUsers(prevUsers => prevUsers.map(u => {
+                const isChatPartner = (u.id === msg.senderId) || (u.id === msg.receiverId);
+                if (isChatPartner) {
+                    return { ...u, lastMessage: msg.content };
+                }
+                return u;
+            }));
         };
 
         socket.on('receiveMessage', handleReceiveMessage);
@@ -87,11 +94,6 @@ export const ChatPage: React.FC = () => {
 
         socket.emit('sendMessage', payload);
 
-        // Optimistic update
-        // We wait for server to acknowledge or broadcast back?
-        // The current backend broadcasts to receiver. 
-        // It does NOT currently broadcast back to sender implicitly unless we listen for it.
-        // Let's manually append it for instant feedback.
         const tempMsg: ChatMessage = {
             id: Date.now(),
             senderId: user.id,
@@ -101,6 +103,14 @@ export const ChatPage: React.FC = () => {
             isSelf: true
         };
         setMessages(prev => [...prev, tempMsg]);
+
+        // Update lastMessage for selected user immediately
+        setUsers(prevUsers => prevUsers.map(u => {
+            if (u.id === selectedUser.id) {
+                return { ...u, lastMessage: content };
+            }
+            return u;
+        }));
     };
 
     return (

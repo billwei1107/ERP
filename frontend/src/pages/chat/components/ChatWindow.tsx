@@ -13,6 +13,15 @@ interface ChatWindowProps {
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({ selectedUser, messages, onSendMessage, currentUserId }) => {
     const [newMessage, setNewMessage] = useState('');
+    const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    React.useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,15 +68,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ selectedUser, messages, 
                     const isSelf = msg.senderId === currentUserId;
                     return (
                         <div key={msg.id} className={`message-bubble-wrapper ${isSelf ? 'self' : 'other'}`}>
-                            <div className="message-bubble">
-                                {msg.content}
-                                <div className="message-time">
-                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </div>
-                            </div>
+                            {isSelf ? (
+                                <>
+                                    <div className="message-time">
+                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="message-bubble">
+                                        {msg.content}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="message-bubble">
+                                        {msg.content}
+                                    </div>
+                                    <div className="message-time">
+                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     );
                 })}
+                <div ref={messagesEndRef} />
             </div>
 
             <div className="chat-input-area">

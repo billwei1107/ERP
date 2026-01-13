@@ -94,15 +94,20 @@
 
 .message-bubble-wrapper {
     display: flex;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
     width: 100%;
 }
 
 .message-bubble-wrapper.self {
     justify-content: flex-end;
+    flex-direction: row;
 }
 
 .message-bubble-wrapper.other {
     justify-content: flex-start;
+    flex-direction: row;
 }
 
 .message-bubble {
@@ -129,10 +134,10 @@
 }
 
 .message-time {
-    font-size: 0.65rem;
-    margin-top: 0.25rem;
-    opacity: 0.8;
-    text-align: right;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    margin-bottom: 0.25rem;
 }
 
 /* Input Area */
