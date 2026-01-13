@@ -12,6 +12,8 @@ import { MyAttendance } from './pages/attendance/MyAttendance';
 // import { ProductManagement } from './pages/inventory/ProductManagement';
 // import { InventoryMovements } from './pages/inventory/InventoryMovements';
 import { InventoryPage } from './pages/inventory/InventoryPage';
+import { FinanceDashboard } from './pages/finance/FinanceDashboard';
+import { ProfileSettings } from './pages/settings/ProfileSettings';
 
 function App() {
     return (
@@ -56,6 +58,24 @@ function App() {
                     <ProtectedRoute>
                         <MainLayout>
                             <InventoryPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+
+                {/* Finance Routes */}
+                <Route path="/finance" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <FinanceDashboard />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+
+                {/* Settings Routes */}
+                <Route path="/settings" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <ProfileSettings />
                         </MainLayout>
                     </ProtectedRoute>
                 } />

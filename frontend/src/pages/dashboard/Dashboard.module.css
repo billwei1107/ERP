@@ -9,7 +9,8 @@
 }
 
 .alertBanner {
-    background-color: #FEF2F2;
+    background-color: rgba(254, 226, 226, 0.9);
+    /* Red 100 */
     border: 1px solid #FECACA;
     color: #991B1B;
     padding: 1rem;

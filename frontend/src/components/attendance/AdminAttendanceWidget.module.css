@@ -1,5 +1,5 @@
 .widget {
-    background: white;
+    background: var(--bg-card);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     box-shadow: var(--shadow-sm);
@@ -24,8 +24,8 @@
 }
 
 .badge {
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: white;
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: 999px;
@@ -61,7 +61,7 @@
 .empId {
     font-size: 0.75rem;
     color: var(--text-secondary);
-    background-color: #fff;
+    background-color: var(--bg-card);
     padding: 2px 6px;
     border-radius: 4px;
     border: 1px solid var(--border-light);

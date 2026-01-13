@@ -16,6 +16,10 @@ export class UsersService {
       password: 'admin123', // In real app, this should be hashed
       role: Role.ADMIN,
       empId: 'ADM001',
+      avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff',
+      bio: 'System Administrator',
+      status: 'ONLINE',
+      themePreference: 'light'
     },
     {
       id: 1,
@@ -24,6 +28,10 @@ export class UsersService {
       password: 'user123',
       role: Role.STAFF,
       empId: 'EMP001',
+      avatar: 'https://ui-avatars.com/api/?name=Bill+Wei&background=random',
+      bio: 'Frontend Developer',
+      status: 'BUSY',
+      themePreference: 'light'
     },
     {
       id: 2,
@@ -32,6 +40,10 @@ export class UsersService {
       password: 'user123',
       role: Role.STAFF,
       empId: 'EMP002',
+      avatar: 'https://ui-avatars.com/api/?name=Jane+Doe&background=random',
+      bio: 'Sales Representative',
+      status: 'OFFLINE',
+      themePreference: 'light'
     },
     {
       id: 3,
@@ -40,6 +52,10 @@ export class UsersService {
       password: 'user123',
       role: Role.STAFF,
       empId: 'EMP003',
+      avatar: 'https://ui-avatars.com/api/?name=John+Smith&background=random',
+      bio: 'Software Engineer',
+      status: 'ONLINE',
+      themePreference: 'light'
     },
     {
       id: 4,
@@ -48,6 +64,10 @@ export class UsersService {
       password: 'user123',
       role: Role.STAFF,
       empId: 'EMP004',
+      avatar: 'https://ui-avatars.com/api/?name=Alice+Brown&background=random',
+      bio: 'HR Specialist',
+      status: 'AWAY',
+      themePreference: 'light'
     },
     {
       id: 5,
@@ -56,6 +76,10 @@ export class UsersService {
       password: 'user123',
       role: Role.STAFF,
       empId: 'EMP005',
+      avatar: 'https://ui-avatars.com/api/?name=Bob+Wilson&background=random',
+      bio: 'Marketing Lead',
+      status: 'ONLINE',
+      themePreference: 'light'
     },
     {
       id: 6,
@@ -64,6 +88,10 @@ export class UsersService {
       password: 'user123',
       role: Role.STAFF,
       empId: 'EMP006',
+      avatar: 'https://ui-avatars.com/api/?name=Carol+White&background=random',
+      bio: 'Product Manager',
+      status: 'BUSY',
+      themePreference: 'light'
     },
     {
       id: 7,
@@ -72,6 +100,10 @@ export class UsersService {
       password: 'user123',
       role: Role.MANAGER,
       empId: 'EMP007',
+      avatar: 'https://ui-avatars.com/api/?name=David+Lee&background=random',
+      bio: 'Operations Manager',
+      status: 'ONLINE',
+      themePreference: 'light'
     }
   ];
 

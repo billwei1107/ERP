@@ -1,15 +1,17 @@
 :root {
   /* Clean White Theme Palette */
-  --color-primary: #0066CC; /* Professional Blue */
+  --color-primary: #0066CC;
+  /* Professional Blue */
   --color-primary-hover: #0052A3;
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
 
-  --bg-body: #F9FAFB; /* Very light gray, almost white */
+  --bg-body: #F9FAFB;
+  /* Very light gray, almost white */
   --bg-card: #FFFFFF;
   --bg-sidebar: #FFFFFF;
-  
+
   --text-main: #111827;
   --text-secondary: #6B7280;
   --text-light: #9CA3AF;
@@ -38,6 +40,35 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+
+
+:root.dark {
+  --color-primary: #3B82F6;
+  /* Lighter blue for dark mode */
+  --color-primary-hover: #2563EB;
+
+  --bg-body: #111827;
+  /* Gray 900 */
+  --bg-card: #1F2937;
+  /* Gray 800 */
+  --bg-sidebar: #1F2937;
+
+  --text-main: #F9FAFB;
+  /* Gray 50 */
+  --text-secondary: #D1D5DB;
+  /* Gray 300 */
+  --text-light: #9CA3AF;
+  /* Gray 400 */
+
+  --border-light: #374151;
+  /* Gray 700 */
+  --border-focus: #3B82F6;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
 body {
   margin: 0;
   display: flex;
@@ -50,7 +81,9 @@ body {
   height: 100%;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 

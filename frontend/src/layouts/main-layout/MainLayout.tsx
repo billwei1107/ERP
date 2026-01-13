@@ -10,7 +10,7 @@ import './MainLayout.css';
 import { Button } from '../../components/ui/button';
 
 import { useAuth } from '../../lib/auth-context';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -19,6 +19,8 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const { user, isAdmin, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
     const handleLogout = () => {
         logout();
@@ -27,7 +29,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
     return (
         <div className="erp-layout">
-            <aside className="erp-sidebar">
+            <aside className={`erp-sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
                 <div className="erp-sidebar__header">
                     <h2>ERP 管理系統</h2>
                     <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '0.25rem' }}>
@@ -56,7 +58,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     >
                         庫存管理
                     </div>
-                    <div className="erp-sidebar__item">財務管理</div>
+                    <div
+                        className={`erp-sidebar__item ${location.pathname.startsWith('/finance') ? 'active' : ''}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/finance')}
+                    >
+                        財務管理
+                    </div>
+
                     {isAdmin && (
                         <>
                             <div
@@ -85,11 +94,27 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             <div className="erp-content-wrapper">
                 <header className="erp-header">
-                    <div className="erp-header__left">
+                    <div className="erp-header__left" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            style={{ padding: '0.5rem' }}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </Button>
                         <h3>儀表板</h3>
                     </div>
                     <div className="erp-header__right">
-                        <Button variant="secondary" size="sm">個人設定</Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => navigate('/settings')}
+                        >
+                            個人設定
+                        </Button>
                     </div>
                 </header>
 
