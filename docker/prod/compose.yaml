@@ -4,8 +4,8 @@ services:
   # Frontend Service
   frontend:
     build:
-      context: ../../frontend
-      dockerfile: ../docker/prod/Dockerfile.frontend
+      context: ../../
+      dockerfile: docker/prod/Dockerfile.frontend
     container_name: erp-frontend
     ports:
       - "80:80"
@@ -18,8 +18,8 @@ services:
   # Backend Service
   backend:
     build:
-      context: ../../backend
-      dockerfile: ../docker/prod/Dockerfile.backend
+      context: ../../
+      dockerfile: docker/prod/Dockerfile.backend
     container_name: erp-backend
     ports:
       - "3000:3000"

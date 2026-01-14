@@ -5,11 +5,11 @@ WORKDIR /app
 
 # Install dependencies
 RUN apk add --no-cache openssl procps
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install
 
 # Copy source
-COPY . .
+COPY backend/ .
 
 # Build
 RUN npm run build
@@ -20,7 +20,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install production dependencies only
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install --omit=dev
 
 # Copy built application
