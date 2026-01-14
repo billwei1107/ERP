@@ -1,0 +1,31 @@
+name: Deploy ERP System
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Using simple SSH deployment since we already have Docker on the server
+      # Ideally we build images here and push to ECR, but for simplicity/cost:
+      # We will just ssh into server, git pull, and docker compose up.
+      
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }} # 54.255.186.244
+          username: ${{ secrets.USERNAME }} # ec2-user
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/erp
+            git pull
+            # Rebuild ensures new services (chat-service) are built
+            docker compose --env-file .env -f docker/prod/compose.yaml up -d --build
+            # Prune old images to save space
+            docker image prune -f

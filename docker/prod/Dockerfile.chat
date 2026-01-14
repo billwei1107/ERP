@@ -1,0 +1,28 @@
+# Build Stage
+FROM golang:1.21-alpine AS build
+
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod ./
+# Only download if go.sum exists (it won't initially, but good for future)
+# RUN go mod download 
+# Since we don't have go.sum yet, we can create it or just build with -mod=mod
+# Ideally, we should run go mod tidy
+
+COPY . .
+
+# Generate go.sum and build
+RUN go mod tidy
+RUN go build -o chat-service .
+
+# Production Stage
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=build /app/chat-service .
+
+EXPOSE 8081
+
+CMD ["./chat-service"]

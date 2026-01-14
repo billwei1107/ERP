@@ -36,6 +36,20 @@ services:
       - erp-network
     restart: always
 
+  # Chat Service (Go)
+  chat-service:
+    build:
+      context: ../../chat-service
+      dockerfile: ../docker/prod/Dockerfile.chat
+    container_name: erp-chat
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+    networks:
+      - erp-network
+    restart: always
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine

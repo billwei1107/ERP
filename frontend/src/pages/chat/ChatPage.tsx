@@ -52,34 +52,48 @@ export const ChatPage: React.FC = () => {
     useEffect(() => {
         if (!socket) return;
 
-        const handleReceiveMessage = (msg: ChatMessage) => {
-            // Only append if it belongs to the current conversation
-            // msg.senderId is the other person (or self if echoed)
-            // msg.receiverId is self (or other if echoed)
+        socket.onmessage = (event) => {
+            try {
+                // Determine message type (or assume all are chat messages for now)
+                // Go service simply broadcasts bytes, so we parse JSON
+                const msg: ChatMessage = JSON.parse(event.data);
 
-            // If the message is from the selected user OR sent by me to the selected user
-            const isRelevant =
-                (selectedUser && msg.senderId === selectedUser.id) ||
-                (selectedUser && msg.senderId === user?.id && msg.receiverId === selectedUser.id);
+                // Only append if it belongs to the current conversation
+                // msg.senderId is the other person (or self if echoed)
+                // msg.receiverId is self (or other if echoed)
 
-            if (isRelevant) {
-                setMessages(prev => [...prev, msg]);
-            }
+                // If the message is from the selected user OR sent by me to the selected user
+                // (Note: Go service might broadcast echoed messages back to sender)
+                const isRelevant =
+                    (selectedUser && msg.senderId === selectedUser.id) ||
+                    (selectedUser && msg.senderId === user?.id && msg.receiverId === selectedUser.id);
 
-            // Update lastMessage in UserList
-            setUsers(prevUsers => prevUsers.map(u => {
-                const isChatPartner = (u.id === msg.senderId) || (u.id === msg.receiverId);
-                if (isChatPartner) {
-                    return { ...u, lastMessage: msg.content };
+                if (isRelevant) {
+                    setMessages(prev => {
+                        // Dedup if optimistic UI already added it
+                        if (prev.some(m => m.id === msg.id)) return prev;
+                        return [...prev, msg];
+                    });
                 }
-                return u;
-            }));
+
+                // Update lastMessage in UserList
+                setUsers(prevUsers => prevUsers.map(u => {
+                    const isChatPartner = (u.id === msg.senderId) || (u.id === msg.receiverId);
+                    if (isChatPartner) {
+                        return { ...u, lastMessage: msg.content };
+                    }
+                    return u;
+                }));
+            } catch (e) {
+                console.error('Failed to parse websocket message', e);
+            }
         };
 
-        socket.on('receiveMessage', handleReceiveMessage);
+        // socket.on('receiveMessage', handleReceiveMessage); is deprecated
 
         return () => {
-            socket.off('receiveMessage', handleReceiveMessage);
+            // socket cleanup handled in hook usually, accessing onmessage directly overlaps
+            socket.onmessage = null;
         };
     }, [socket, selectedUser, user]);
 
@@ -92,7 +106,14 @@ export const ChatPage: React.FC = () => {
             content
         };
 
-        socket.emit('sendMessage', payload);
+        // Send via WebSocket
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(payload));
+        } else {
+            console.warn('Socket not open');
+        }
+
+        // socket.emit('sendMessage', payload);
 
         const tempMsg: ChatMessage = {
             id: Date.now(),
