@@ -115,17 +115,10 @@ export const ChatPage: React.FC = () => {
 
         // socket.emit('sendMessage', payload);
 
-        const tempMsg: ChatMessage = {
-            id: Date.now(),
-            senderId: user.id,
-            receiverId: selectedUser.id,
-            content,
-            createdAt: new Date().toISOString(),
-            isSelf: true
-        };
-        setMessages(prev => [...prev, tempMsg]);
+        // Optimistic update removed to avoid duplication since server echoes back
+        // setMessages(prev => [...prev, tempMsg]);
 
-        // Update lastMessage for selected user immediately
+        // However, we still update the user list's last message for immediate feedback
         setUsers(prevUsers => prevUsers.map(u => {
             if (u.id === selectedUser.id) {
                 return { ...u, lastMessage: content };
