@@ -1,0 +1,37 @@
+# Build Stage
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Install dependencies
+RUN apk add --no-cache openssl procps
+COPY package*.json ./
+RUN npm install
+
+# Copy source
+COPY . .
+
+# Build
+RUN npm run build
+
+# Production Stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install production dependencies only
+COPY package*.json ./
+RUN npm install --omit=dev
+
+# Copy built application
+COPY --from=build /app/dist ./dist
+# Copy prisma schema if needed for migration/generation
+COPY --from=build /app/prisma ./prisma
+# Copy .env.example or needed config files if any (env usually injected via compose)
+
+# Generate Prisma Client (if not included in node_modules explicitly or needs regeneration)
+RUN npx prisma generate
+
+EXPOSE 3000
+
+CMD ["node", "dist/main"]

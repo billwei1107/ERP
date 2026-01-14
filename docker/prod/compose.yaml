@@ -1,0 +1,74 @@
+name: erp-system-prod
+
+services:
+  # Frontend Service
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: ../docker/prod/Dockerfile.frontend
+    container_name: erp-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - erp-network
+    restart: always
+
+  # Backend Service
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: ../docker/prod/Dockerfile.backend
+    container_name: erp-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@postgres:5432/erp_db
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - erp-network
+    restart: always
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: erp-postgres
+    volumes:
+      - erp-db-prod-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=erp_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-network
+    restart: always
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: erp-redis
+    volumes:
+      - erp-redis-prod-data:/data
+    networks:
+      - erp-network
+    restart: always
+
+networks:
+  erp-network:
+    driver: bridge
+
+volumes:
+  erp-db-prod-data:
+  erp-redis-prod-data:
