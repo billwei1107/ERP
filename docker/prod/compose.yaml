@@ -46,6 +46,7 @@ services:
       - "8081:8081"
     environment:
       - PORT=8081
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@postgres:5432/erp_db
     networks:
       - erp-network
     restart: always

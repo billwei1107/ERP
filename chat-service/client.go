@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+    "fmt"
 	"log"
 	"net/http"
 	"time"
@@ -70,14 +71,31 @@ func (c *Client) readPump() {
         // Let's implement basic routing here:
         var msgObj map[string]interface{}
         if err := json.Unmarshal(message, &msgObj); err == nil {
-             // Handle direct message
-             if _, ok := msgObj["receiverId"]; ok {
-                 // Convert rid to string if needed
-                 // c.hub.sendTo(...)
-                 // For now, let's keep it simple: Broadcast all, frontend filters? 
-                 // No, that leaks privacy. 
-                 // Let's modify Hub to route properly.
-                 c.hub.broadcast <- message
+             if receiverIdFloat, ok := msgObj["receiverId"].(float64); ok {
+                 receiverId := int(receiverIdFloat)
+                 senderIdStr := c.userId
+                 // Convert senderId to int
+                 var senderId int
+                 fmt.Sscanf(senderIdStr, "%d", &senderId)
+
+                 content, _ := msgObj["content"].(string)
+
+                 // Save to DB
+                 id, createdAt, err := saveMessage(senderId, receiverId, content)
+                 if err != nil {
+                     log.Printf("Error saving message: %v", err)
+                     continue 
+                 }
+
+                 // Augment message with ID and timestamp for the frontend
+                 msgObj["id"] = id
+                 msgObj["createdAt"] = createdAt
+                 msgObj["senderId"] = senderId
+                 
+                 // Re-marshal to send proper JSON with ID
+                 finalMsg, _ := json.Marshal(msgObj)
+
+                 c.hub.broadcast <- finalMsg
              }
         }
 	}

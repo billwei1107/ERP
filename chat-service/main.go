@@ -12,6 +12,8 @@ func main() {
         port = "8081"
     }
 
+    initDB()
+
 	hub := newHub()
 	go hub.run()
 
