@@ -5,7 +5,7 @@ export interface ChatUser {
     name: string;
     role: string;
     avatar?: string;
-    status: 'online' | 'offline';
+    status: 'online' | 'offline' | 'dnd';
     lastMessage?: string;
 }
 

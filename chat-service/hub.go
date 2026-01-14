@@ -39,12 +39,36 @@ func (h *Hub) run() {
 			h.clients[client] = true
             h.users[client.userId] = client
             log.Printf("User registered: %s", client.userId)
+            
+            // Broadcast ONLINE status
+            // In real world, check DB for DND first.
+            // For now, let's assume if they connect, they are ONLINE (unless we implement DND fetching).
+            // Let's broadcast "ONLINE"
+            statusMsg := map[string]interface{}{
+                "type": "status_update",
+                "userId": client.userId, // client.userId is string, but frontend expects number? 
+                // Let's send as number if possible or frontend handles it. 
+                // client.userId is string from query param.
+                "status": "online",
+            }
+            jsonMsg, _ := json.Marshal(statusMsg)
+            h.broadcastMessage(jsonMsg)
+
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
                 delete(h.users, client.userId)
 				close(client.send)
                 log.Printf("User unregistered: %s", client.userId)
+                
+                // Broadcast OFFLINE status
+                statusMsg := map[string]interface{}{
+                    "type": "status_update",
+                    "userId": client.userId,
+                    "status": "offline",
+                }
+                jsonMsg, _ := json.Marshal(statusMsg)
+                h.broadcastMessage(jsonMsg)
 			}
 		case message := <-h.broadcast:
             // Parse message to find receiver
@@ -86,6 +110,17 @@ func (h *Hub) sendTo(userId string, message []byte) {
             close(client.send)
             delete(h.clients, client)
             delete(h.users, userId)
+        }
+    }
+}
+
+func (h *Hub) broadcastMessage(message []byte) {
+    for client := range h.clients {
+        select {
+        case client.send <- message:
+        default:
+            close(client.send)
+            delete(h.clients, client)
         }
     }
 }

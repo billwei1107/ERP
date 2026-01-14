@@ -54,9 +54,26 @@ export const ChatPage: React.FC = () => {
 
         socket.onmessage = (event) => {
             try {
-                // Determine message type (or assume all are chat messages for now)
-                // Go service simply broadcasts bytes, so we parse JSON
-                const msg: ChatMessage = JSON.parse(event.data);
+                const data = JSON.parse(event.data);
+
+                // Handle Status Updates
+                if (data.type === 'status_update') {
+                    const { userId, status } = data;
+                    setUsers(prevUsers => prevUsers.map(u => {
+                        // userId from Go is string, ours is number
+                        if (String(u.id) === String(userId)) {
+                            // If user is DND, do not override with online/offline unless the update IS 'dnd'
+                            // But for now, let's just trust the server.
+                            // If we implement DND, we need to persist it.
+                            return { ...u, status: status };
+                        }
+                        return u;
+                    }));
+                    return;
+                }
+
+                // Handle Chat Messages
+                const msg: ChatMessage = data;
 
                 // Only append if it belongs to the current conversation
                 // msg.senderId is the other person (or self if echoed)
