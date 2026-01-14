@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, OnModuleInit } from '@nestjs/common';
 
 export enum Role {
   ADMIN = 'ADMIN',
@@ -6,8 +6,35 @@ export enum Role {
   STAFF = 'STAFF',
 }
 
+import { PrismaService } from '../prisma/prisma.service';
+
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  constructor(private prisma: PrismaService) { }
+
+  async onModuleInit() {
+    // Seed hardcoded users to DB to ensure FK constraints work
+    for (const user of this.users) {
+      await this.prisma.user.upsert({
+        where: { email: user.email },
+        update: {
+          name: user.name,
+          password: user.password,
+          // role: user.role // Need to ensure Enum matches or cast
+        },
+        create: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          password: user.password,
+          // role: user.role // Role Enum might mismatch if passed as string directly depending on import
+          // Assuming Role values match Prisma enum
+        }
+      });
+    }
+    console.log('Seeded hardcoded users to DB');
+  }
+
   private users = [
     {
       id: 100,
