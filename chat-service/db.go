@@ -48,9 +48,12 @@ func saveMessage(senderId int, receiverId int, content string) (int, string, err
     // We need to verify if column names are camelCase or snake_case.
     // Prisma default maps fields as is. So "senderId" is likely "senderId".
     
+    log.Printf("Saving message from %d to %d: %s", senderId, receiverId, content)
     err := db.QueryRow(query, senderId, receiverId, content).Scan(&id, &createdAt)
     if err != nil {
+        log.Printf("DB Insert Error: %v", err)
         return 0, "", err
     }
+    log.Printf("Message saved with ID: %d", id)
     return id, createdAt, nil
 }
