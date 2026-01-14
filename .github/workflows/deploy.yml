@@ -21,8 +21,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }} # 54.255.186.244
           username: ${{ secrets.USERNAME }} # ec2-user
-          password: ${{ secrets.PASSWORD }}
-          # key: ${{ secrets.SSH_KEY }} # Switch to password auth
+          key: ${{ secrets.SSH_KEY }}
+          # password: ${{ secrets.PASSWORD }}
           script: |
             cd /opt/erp
             git pull
