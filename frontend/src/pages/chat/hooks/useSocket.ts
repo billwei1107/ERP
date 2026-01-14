@@ -11,7 +11,8 @@ export const useSocket = () => {
         if (!user) return;
 
         // Initialize socket connection
-        const socket = io('http://localhost:3000/chat', {
+        const baseUrl = import.meta.env.PROD ? window.location.origin : 'http://localhost:3000';
+        const socket = io(`${baseUrl}/chat`, {
             query: { userId: user.id },
             transports: ['websocket'],
         });
