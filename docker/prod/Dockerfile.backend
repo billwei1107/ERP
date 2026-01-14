@@ -4,7 +4,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # Install dependencies
-RUN apk add --no-cache openssl procps
+RUN apk add --no-cache openssl procps gcompat compat-openssl1.1
 COPY backend/package*.json ./
 RUN npm install
 
@@ -19,7 +19,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install production dependencies only
+# Install production dependencies only, including OpenSSL compat
+RUN apk add --no-cache openssl procps gcompat compat-openssl1.1
 COPY backend/package*.json ./
 RUN npm install --omit=dev
 
