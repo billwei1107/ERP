@@ -55,13 +55,9 @@ func (h *Hub) run() {
             }
 
             // Simple routing logic based on 'receiverId'
-            if receiverId, ok := msg["receiverId"].(float64); ok {
-                 // JSON numbers are floats
-                 // Convert to string or whatever your ID type is. 
-                 // Assuming IDs are sent as numbers but we store keys as strings potentially? 
-                 // Let's coerce to string for map key
-                 rid := string(int(receiverId)) // rough case
-                 // Actually let's assume valid payload type
+            if _, ok := msg["receiverId"].(float64); ok {
+                 // Custom routing logic placeholder
+                 // rid := string(int(receiverId)) 
             }
             // For now, let's just broadcast to everyone for simplicity or specific logic
             // But wait, the previous code had direct messaging.

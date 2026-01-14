@@ -71,7 +71,7 @@ func (c *Client) readPump() {
         var msgObj map[string]interface{}
         if err := json.Unmarshal(message, &msgObj); err == nil {
              // Handle direct message
-             if rid, ok := msgObj["receiverId"]; ok {
+             if _, ok := msgObj["receiverId"]; ok {
                  // Convert rid to string if needed
                  // c.hub.sendTo(...)
                  // For now, let's keep it simple: Broadcast all, frontend filters? 
