@@ -18,6 +18,11 @@ func initDB() {
         log.Fatal("DATABASE_URL environment variable is required")
     }
 
+    // Force disable SSL for internal docker connection
+    if os.Getenv("DATABASE_SSL_MODE") != "require" {
+        connStr += "?sslmode=disable"
+    }
+
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
