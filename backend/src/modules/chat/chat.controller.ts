@@ -11,6 +11,12 @@ export class ChatController {
         @Param('userId') userId: string,
         @Param('otherUserId') otherUserId: string
     ) {
-        return this.chatService.getMessages(Number(userId), Number(otherUserId));
+        try {
+            console.log(`Fetching history for ${userId} and ${otherUserId}`);
+            return await this.chatService.getMessages(Number(userId), Number(otherUserId));
+        } catch (error) {
+            console.error('Failed to fetch history:', error);
+            throw error;
+        }
     }
 }
