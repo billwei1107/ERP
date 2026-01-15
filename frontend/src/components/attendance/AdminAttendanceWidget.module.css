@@ -37,8 +37,9 @@
     flex-direction: column;
     gap: 0.75rem;
     overflow-y: auto;
-    max-height: 320px;
-    /* Approx 5 items */
+    flex: 1;
+    /* Fill available space */
+    /* max-height: 320px; Removed to allow filling the container */
     padding-right: 0.5rem;
     /* Avoid scrollbar covering content */
 }
