@@ -139,7 +139,7 @@ export class UsersService implements OnModuleInit {
           { email: empIdOrEmail },
           { empId: empIdOrEmail }
         ]
-      }
+      } as any
     });
 
     if (!user || user.password !== pass) {
