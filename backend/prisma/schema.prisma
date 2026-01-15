@@ -17,7 +17,7 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  empId     String   @unique @default(cuid()) // unique employee ID
+  empId     String?  @unique @default(cuid()) // unique employee ID, optional for migration compatibility
   password  String
   name      String
   role      Role     @default(STAFF)
