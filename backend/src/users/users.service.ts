@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, ConflictException, OnModuleInit } from '@nestjs/common';
 
 export enum Role {
   ADMIN = 'ADMIN',
@@ -196,7 +196,7 @@ export class UsersService implements OnModuleInit {
     } catch (e: any) {
       console.error('Create User Error:', e);
       if (e.code === 'P2002') {
-        throw new UnauthorizedException('Email or Employee ID already exists. Please try again.');
+        throw new ConflictException('Email or Employee ID already exists. Please try again.');
       }
       throw new Error('Failed to create user: ' + e.message);
     }
