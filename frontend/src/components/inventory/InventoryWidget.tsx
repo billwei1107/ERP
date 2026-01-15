@@ -44,20 +44,20 @@ export function InventoryWidget() {
 
             <div className={styles.metrics}>
                 <div className={styles.metricCard}>
-                    <span className={styles.metricValue}>{summary.totalProducts}</span>
                     <span className={styles.metricLabel}>總商品數</span>
+                    <span className={styles.metricValue}>{summary.totalProducts}</span>
                 </div>
                 <div className={styles.metricCard}>
+                    <span className={styles.metricLabel}>低庫存品項</span>
                     <span className={styles.metricValue} style={{ color: 'var(--color-danger)' }}>
                         {summary.lowStockCount}
                     </span>
-                    <span className={styles.metricLabel}>低庫存品項</span>
                 </div>
                 <div className={styles.metricCard}>
+                    <span className={styles.metricLabel}>總庫存價值</span>
                     <span className={styles.metricValue}>
                         ${(summary.totalValue / 10000).toFixed(1)}w
                     </span>
-                    <span className={styles.metricLabel}>總庫存價值</span>
                 </div>
             </div>
 
