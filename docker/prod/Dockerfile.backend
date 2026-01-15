@@ -36,4 +36,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # Run migrations before starting
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+CMD ["/bin/sh", "-c", "npx prisma db push && node dist/main"]
