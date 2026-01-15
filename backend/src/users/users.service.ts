@@ -12,29 +12,6 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UsersService implements OnModuleInit {
   constructor(private prisma: PrismaService) { }
 
-  async onModuleInit() {
-    // Seed hardcoded users to DB to ensure FK constraints work
-    for (const user of this.users) {
-      await this.prisma.user.upsert({
-        where: { email: user.email },
-        update: {
-          name: user.name,
-          password: user.password,
-          // role: user.role // Need to ensure Enum matches or cast
-        },
-        create: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          password: user.password,
-          // role: user.role // Role Enum might mismatch if passed as string directly depending on import
-          // Assuming Role values match Prisma enum
-        }
-      });
-    }
-    console.log('Seeded hardcoded users to DB');
-  }
-
   // Hardcoded users for seeding only
   private readonly seedUsers = [
     {
@@ -138,8 +115,6 @@ export class UsersService implements OnModuleInit {
   async onModuleInit() {
     // Seed hardcoded users to DB to ensure FK constraints work
     for (const user of this.seedUsers) {
-      // Upsert to ensure they exist but don't duplicate
-      // Using 'any' cast for role if strictly typed enum issues arise
       await this.prisma.user.upsert({
         where: { email: user.email },
         update: {}, // Don't overwrite if exists
@@ -151,21 +126,13 @@ export class UsersService implements OnModuleInit {
           password: user.password,
           role: user.role,
           status: user.status
-        } as any
+        } as any // Use any to bypass strict typing if schema mismatch during seeding
       });
     }
     console.log('Seeded hardcoded users to DB');
   }
 
-  // NOTE: Schema check revealed User model might lack empId, avatar, bio, themePreference.
-  // I must check schema again. If they are missing, I need to add them.
-  // Viewing schema again to be sure.
-
   async login(empIdOrEmail: string, pass: string) {
-    // Check both email and maybe empId if it exists?
-    // Since schema might lack empId, we stick to email for now, or name?
-    // In-memory logic used: `u.empId === empIdOrEmail || u.email === empIdOrEmail`
-
     const user = await this.prisma.user.findFirst({
       where: {
         OR: [
@@ -200,7 +167,6 @@ export class UsersService implements OnModuleInit {
   }
 
   async update(id: number, updateUserDto: any) {
-    // Remove properties not in schema if necessary
     const user = await this.prisma.user.update({
       where: { id },
       data: updateUserDto
@@ -210,16 +176,7 @@ export class UsersService implements OnModuleInit {
   }
 
   async create(createUserDto: any) {
-    // Auto-increment handled by DB usually, but here ID is manual in seed?
-    // Prisma model: id Int @id @default(autoincrement())
-    // So we don't need to pass ID.
-
-    // Generate empId if needed?
-    // If schema doesn't have empId, we can't save it.
-
-    // For consistency with seed data (EMP001), let's generate ID
-    // Note: In a real high-concurrency app, this ID generation is not race-condition safe.
-    // Ideally use a sequence or dedicated counter.
+    // Generate empId if needed
     const lastUser = await this.prisma.user.findFirst({ orderBy: { id: 'desc' } });
     const newId = (lastUser?.id || 0) + 1;
     const generatedEmpId = createUserDto.empId || `EMP${String(newId).padStart(3, '0')}`;
@@ -244,4 +201,4 @@ export class UsersService implements OnModuleInit {
     const { password, ...result } = user;
     return result;
   }
-}}
+}
