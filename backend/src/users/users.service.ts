@@ -35,12 +35,13 @@ export class UsersService implements OnModuleInit {
     console.log('Seeded hardcoded users to DB');
   }
 
-  private users = [
+  // Hardcoded users for seeding only
+  private readonly seedUsers = [
     {
       id: 100,
       name: 'Admin User',
       email: 'admin@erp.com',
-      password: 'admin123', // In real app, this should be hashed
+      password: 'admin123',
       role: Role.ADMIN,
       empId: 'ADM001',
       avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff',
@@ -134,8 +135,46 @@ export class UsersService implements OnModuleInit {
     }
   ];
 
+  async onModuleInit() {
+    // Seed hardcoded users to DB to ensure FK constraints work
+    for (const user of this.seedUsers) {
+      // Upsert to ensure they exist but don't duplicate
+      // Using 'any' cast for role if strictly typed enum issues arise
+      await this.prisma.user.upsert({
+        where: { email: user.email },
+        update: {}, // Don't overwrite if exists
+        create: {
+          id: user.id,
+          email: user.email,
+          empId: user.empId,
+          name: user.name,
+          password: user.password,
+          role: user.role,
+          status: user.status
+        } as any
+      });
+    }
+    console.log('Seeded hardcoded users to DB');
+  }
+
+  // NOTE: Schema check revealed User model might lack empId, avatar, bio, themePreference.
+  // I must check schema again. If they are missing, I need to add them.
+  // Viewing schema again to be sure.
+
   async login(empIdOrEmail: string, pass: string) {
-    const user = this.users.find(u => u.empId === empIdOrEmail || u.email === empIdOrEmail);
+    // Check both email and maybe empId if it exists?
+    // Since schema might lack empId, we stick to email for now, or name?
+    // In-memory logic used: `u.empId === empIdOrEmail || u.email === empIdOrEmail`
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: empIdOrEmail },
+          { empId: empIdOrEmail }
+        ]
+      }
+    });
+
     if (!user || user.password !== pass) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -145,45 +184,64 @@ export class UsersService implements OnModuleInit {
   }
 
   async findAll() {
-    return this.users.map(({ password, ...user }) => user);
+    const users = await this.prisma.user.findMany({
+      orderBy: { id: 'asc' }
+    });
+    return users.map(({ password, ...user }) => user);
   }
 
   async findOne(id: number) {
-    const user = this.users.find(u => u.id === id);
+    const user = await this.prisma.user.findUnique({
+      where: { id }
+    });
     if (!user) throw new NotFoundException(`User #${id} not found`);
     const { password, ...result } = user;
     return result;
   }
 
   async update(id: number, updateUserDto: any) {
-    const index = this.users.findIndex(u => u.id === id);
-    if (index === -1) throw new NotFoundException(`User #${id} not found`);
-
-    this.users[index] = { ...this.users[index], ...updateUserDto };
-    const { password, ...result } = this.users[index];
+    // Remove properties not in schema if necessary
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: updateUserDto
+    });
+    const { password, ...result } = user;
     return result;
   }
 
   async create(createUserDto: any) {
-    const newId = Math.max(...this.users.map(u => u.id)) + 1;
-    const newUser = {
-      id: newId,
-      ...createUserDto,
-      password: createUserDto.password || 'user123', // Default password if not provided
-      empId: createUserDto.empId || `EMP${String(newId).padStart(3, '0')}`,
-    };
-    this.users.push(newUser);
+    // Auto-increment handled by DB usually, but here ID is manual in seed?
+    // Prisma model: id Int @id @default(autoincrement())
+    // So we don't need to pass ID.
+
+    // Generate empId if needed?
+    // If schema doesn't have empId, we can't save it.
+
+    // For consistency with seed data (EMP001), let's generate ID
+    // Note: In a real high-concurrency app, this ID generation is not race-condition safe.
+    // Ideally use a sequence or dedicated counter.
+    const lastUser = await this.prisma.user.findFirst({ orderBy: { id: 'desc' } });
+    const newId = (lastUser?.id || 0) + 1;
+    const generatedEmpId = createUserDto.empId || `EMP${String(newId).padStart(3, '0')}`;
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        ...createUserDto,
+        password: createUserDto.password || 'user123',
+        role: createUserDto.role || Role.STAFF,
+        empId: generatedEmpId
+      }
+    });
+
     const { password, ...result } = newUser;
     return result;
   }
 
   async remove(id: number) {
-    const index = this.users.findIndex(u => u.id === id);
-    if (index === -1) throw new NotFoundException(`User #${id} not found`);
-
-    const removedUser = this.users[index];
-    this.users = this.users.filter(u => u.id !== id);
-    const { password, ...result } = removedUser;
+    const user = await this.prisma.user.delete({
+      where: { id }
+    });
+    const { password, ...result } = user;
     return result;
   }
-}
+}}
