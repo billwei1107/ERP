@@ -52,10 +52,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ selectedUser, messages, 
                     </div>
                     <div className="chat-user-details">
                         <div className="chat-user-name">{selectedUser.name}</div>
-                        <div className="chat-user-status">
-                            <span className={`status-dot ${selectedUser.status}`}></span>
-                            {selectedUser.status === 'online' ? 'Active now' : 'Offline'}
-                        </div>
+
                     </div>
                 </div>
                 <div className="chat-header-actions">

@@ -36,7 +36,7 @@ export const UserList: React.FC<UserListProps> = ({ users, onSelectUser, selecte
                         className={`user-item ${selectedUserId === user.id ? 'active' : ''}`}
                         onClick={() => onSelectUser(user)}
                     >
-                        <div className={`user-avatar ${user.status}`}>
+                        <div className="user-avatar">
                             {user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div className="user-info">
