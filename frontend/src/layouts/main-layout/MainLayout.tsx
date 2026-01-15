@@ -32,8 +32,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <aside className={`erp-sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
                 <div className="erp-sidebar__header">
                     <h2>ERP 管理系統</h2>
-                    <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '0.25rem' }}>
-                        {user?.name} ({user?.role})
+                    <div style={{ marginTop: '0.25rem' }}>
+                        <div style={{ fontWeight: 500, fontSize: '0.875rem' }}>{user?.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>{user?.role}</div>
                     </div>
                 </div>
                 <nav className="erp-sidebar__nav">

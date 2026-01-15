@@ -100,11 +100,9 @@ export function DashboardPage() {
             <div className={styles.grid}>
                 <div className={styles.sectionAttendance}>
                     <AttendanceWidget onSuccess={() => setLastUpdate(Date.now())} />
-                    {isAdmin && (
-                        <div style={{ marginTop: '1.5rem' }}>
-                            <AdminAttendanceWidget refreshTrigger={lastUpdate} />
-                        </div>
-                    )}
+                    <div style={{ marginTop: '1.5rem' }}>
+                        <InventoryWidget />
+                    </div>
                 </div>
                 <div className={styles.sectionTodos}>
                     <TodoWidget
@@ -115,7 +113,9 @@ export function DashboardPage() {
                     />
                 </div>
                 <div className={styles.sectionInventory}>
-                    <InventoryWidget />
+                    {isAdmin && (
+                        <AdminAttendanceWidget refreshTrigger={lastUpdate} />
+                    )}
                 </div>
             </div>
         </div>
