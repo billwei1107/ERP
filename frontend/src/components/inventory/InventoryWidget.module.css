@@ -17,9 +17,10 @@
 }
 
 .metrics {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: row;
     gap: 1rem;
+    width: 100%;
 }
 
 .metricCard {
@@ -27,6 +28,8 @@
     padding: 1rem;
     border-radius: var(--radius-md);
     text-align: center;
+    flex: 1;
+    /* Distribute space evenly */
 }
 
 .metricValue {

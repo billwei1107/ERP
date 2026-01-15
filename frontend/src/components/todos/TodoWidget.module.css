@@ -35,9 +35,15 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem;
+    padding: 0 0.75rem;
     border-radius: var(--radius-sm);
     transition: background-color 0.2s;
+    height: 3rem; /* Fixed height */
+    background-color: var(--bg-body); /* Make it look like a card/block */
+    /* Add border/shadow if desired to match "White block" description? 
+       User said: "like the image, the frame is the same". 
+       Usually means they look like uniform rows. */
+    margin-bottom: 0.5rem; /* Spacing between items */
 }
 
 .item:hover {
