@@ -113,23 +113,61 @@ export class UsersService implements OnModuleInit {
   ];
 
   async onModuleInit() {
-    // Seed hardcoded users to DB to ensure FK constraints work
-    for (const user of this.seedUsers) {
-      await this.prisma.user.upsert({
-        where: { email: user.email },
-        update: {}, // Don't overwrite if exists
-        create: {
-          id: user.id,
-          email: user.email,
-          empId: user.empId,
-          name: user.name,
-          password: user.password,
-          role: user.role,
-          status: user.status
-        } as any // Use any to bypass strict typing if schema mismatch during seeding
+    try {
+      // 1. Backfill empty/null empIds first for non-seed users
+      const usersWithoutEmpId = await this.prisma.user.findMany({
+        where: {
+          OR: [
+            { empId: null },
+            { empId: '' }
+          ]
+        }
       });
+
+      if (usersWithoutEmpId.length > 0) {
+        console.log(`Found ${usersWithoutEmpId.length} users with missing empId. Backfilling...`);
+        for (const u of usersWithoutEmpId) {
+          // Check if this user is a seed user (by email) -> let seed loop handle it
+          const isSeed = this.seedUsers.find(s => s.email === u.email);
+          if (isSeed) continue;
+
+          const backfillEmpId = `EMP${String(u.id).padStart(3, '0')}`;
+          // Check exist
+          const exists = await this.prisma.user.findUnique({ where: { empId: backfillEmpId } });
+          if (!exists) {
+            await this.prisma.user.update({
+              where: { id: u.id },
+              data: { empId: backfillEmpId }
+            });
+          }
+        }
+      }
+
+      // 2. Seed hardcoded users to DB
+      for (const user of this.seedUsers) {
+        await this.prisma.user.upsert({
+          where: { email: user.email },
+          update: {
+            empId: user.empId,
+            role: user.role,
+            status: user.status
+          },
+          create: {
+            id: user.id,
+            email: user.email,
+            empId: user.empId,
+            name: user.name,
+            password: user.password,
+            role: user.role,
+            status: user.status
+          } as any
+        });
+      }
+      console.log('Seeded hardcoded users to DB');
+
+    } catch (e) {
+      console.error('Failed to seed users', e);
     }
-    console.log('Seeded hardcoded users to DB');
   }
 
   async login(empIdOrEmail: string, pass: string) {
@@ -145,7 +183,6 @@ export class UsersService implements OnModuleInit {
     if (!user || user.password !== pass) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    // Return user without password
     const { password, ...result } = user;
     return result;
   }
@@ -177,19 +214,30 @@ export class UsersService implements OnModuleInit {
 
   async create(createUserDto: any) {
     try {
-      // Generate empId if needed
-      const lastUser = await this.prisma.user.findFirst({ orderBy: { id: 'desc' } });
-      const newId = (lastUser?.id || 0) + 1;
-      const generatedEmpId = createUserDto.empId || `EMP${String(newId).padStart(3, '0')}`;
+      // Step 1: Create user with no empId (let DB default handle CUID or null)
+      const { empId, ...otherData } = createUserDto;
 
       const newUser = await this.prisma.user.create({
         data: {
-          ...createUserDto,
-          password: createUserDto.password || 'user123',
-          role: createUserDto.role || Role.STAFF,
-          empId: generatedEmpId
+          ...otherData,
+          password: otherData.password || 'user123',
+          role: otherData.role || Role.STAFF,
+          empId: empId || undefined
         }
       });
+
+      // Step 2: If no empId was provided, update it to 'EMP' + id
+      if (!empId) {
+        const formattedId = `EMP${String(newUser.id).padStart(3, '0')}`;
+        // Try to update. If formattedId taken, we might fail or need retry. 
+        // Standard logic: just take it.
+        const updatedUser = await this.prisma.user.update({
+          where: { id: newUser.id },
+          data: { empId: formattedId }
+        });
+        const { password, ...result } = updatedUser;
+        return result;
+      }
 
       const { password, ...result } = newUser;
       return result;
