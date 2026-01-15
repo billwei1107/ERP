@@ -145,23 +145,57 @@ export class UsersService implements OnModuleInit {
 
       // 2. Seed hardcoded users to DB
       for (const user of this.seedUsers) {
-        await this.prisma.user.upsert({
-          where: { email: user.email },
-          update: {
-            empId: user.empId,
-            role: user.role,
-            status: user.status
-          },
-          create: {
-            id: user.id,
-            email: user.email,
-            empId: user.empId,
-            name: user.name,
-            password: user.password,
-            role: user.role,
-            status: user.status
-          } as any
-        });
+        try {
+          // Safe Seed Logic: Check if email exists OR empId exists to avoid unique constraint error
+          const existingByEmail = await this.prisma.user.findUnique({ where: { email: user.email } });
+          const existingByEmpId = await this.prisma.user.findUnique({ where: { empId: user.empId } });
+
+          if (existingByEmail) {
+            // Update by email
+            // GUARD: If updating empId, check if it conflicts with someone else (who is NOT this user)
+            if (existingByEmpId && existingByEmpId.id !== existingByEmail.id) {
+              console.warn(`Skipping seed update for ${user.email}: empId ${user.empId} is taken by User ID ${existingByEmpId.id}`);
+              continue;
+            }
+
+            await this.prisma.user.update({
+              where: { email: user.email },
+              data: {
+                empId: user.empId,
+                role: user.role,
+                status: user.status
+                // Don't overwrite name/password to respect user changes
+              }
+            });
+          } else if (existingByEmpId) {
+            // Email mismatch but EmpId exists -> Update that user to match seed email? 
+            // Or just skip/log warning. Let's update email to match seed for consistency in dev env.
+            await this.prisma.user.update({
+              where: { empId: user.empId },
+              data: {
+                email: user.email,
+                role: user.role,
+                status: user.status
+              }
+            });
+          } else {
+            // New User
+            await this.prisma.user.create({
+              data: {
+                id: user.id,
+                email: user.email,
+                empId: user.empId,
+                name: user.name,
+                password: user.password,
+                role: user.role,
+                status: user.status
+              } as any
+            });
+          }
+        } catch (err) {
+          console.warn(`Failed to seed user ${user.email} due to error: ${err.message}`);
+          // Continue to next user, do not crash!
+        }
       }
       console.log('Seeded hardcoded users to DB');
 

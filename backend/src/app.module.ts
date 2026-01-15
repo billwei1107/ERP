@@ -8,9 +8,19 @@ import { InventoryModule } from './inventory/inventory.module';
 import { UsersModule } from './users/users.module';
 import { FinanceModule } from './finance/finance.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PrismaModule, AttendanceModule, TodosModule, InventoryModule, UsersModule, FinanceModule, ChatModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AttendanceModule,
+    TodosModule,
+    InventoryModule,
+    UsersModule,
+    FinanceModule,
+    ChatModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
