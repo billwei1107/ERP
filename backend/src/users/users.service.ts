@@ -176,22 +176,30 @@ export class UsersService implements OnModuleInit {
   }
 
   async create(createUserDto: any) {
-    // Generate empId if needed
-    const lastUser = await this.prisma.user.findFirst({ orderBy: { id: 'desc' } });
-    const newId = (lastUser?.id || 0) + 1;
-    const generatedEmpId = createUserDto.empId || `EMP${String(newId).padStart(3, '0')}`;
+    try {
+      // Generate empId if needed
+      const lastUser = await this.prisma.user.findFirst({ orderBy: { id: 'desc' } });
+      const newId = (lastUser?.id || 0) + 1;
+      const generatedEmpId = createUserDto.empId || `EMP${String(newId).padStart(3, '0')}`;
 
-    const newUser = await this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: createUserDto.password || 'user123',
-        role: createUserDto.role || Role.STAFF,
-        empId: generatedEmpId
+      const newUser = await this.prisma.user.create({
+        data: {
+          ...createUserDto,
+          password: createUserDto.password || 'user123',
+          role: createUserDto.role || Role.STAFF,
+          empId: generatedEmpId
+        }
+      });
+
+      const { password, ...result } = newUser;
+      return result;
+    } catch (e: any) {
+      console.error('Create User Error:', e);
+      if (e.code === 'P2002') {
+        throw new UnauthorizedException('Email or Employee ID already exists. Please try again.');
       }
-    });
-
-    const { password, ...result } = newUser;
-    return result;
+      throw new Error('Failed to create user: ' + e.message);
+    }
   }
 
   async remove(id: number) {
