@@ -71,7 +71,7 @@ export class ChatService {
 
     async getChatListWithUsers(userId: number) {
         // 1. Get stats
-        const conversations: any[] = await this.getUserConversations(userId);
+        const conversations = (await this.getUserConversations(userId)) as any[];
         const statsMap = new Map();
         conversations.forEach(c => {
             // SQL returns lowercase keys sometimes depending on driver, but prisma raw is strict. 
