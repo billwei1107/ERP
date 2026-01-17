@@ -7,6 +7,7 @@ import 'package:mobile/features/todo/todo_service.dart';
 import 'package:mobile/features/todo/todo_screen.dart';
 import 'package:mobile/features/todo/add_todo_dialog.dart';
 import 'package:mobile/features/chat/chat_user_list_screen.dart';
+import 'package:mobile/features/chat/chat_providers.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -340,6 +341,45 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
 
             const SizedBox(height: 24),
+
+            // 2.5 Unread Message Alert
+            Consumer(
+              builder: (context, ref, child) {
+                final unreadCount = ref.watch(unreadCountProvider);
+                if (unreadCount == 0) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Card(
+                    color: Colors.blue[50],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: Colors.blue[100]!)),
+                    child: ListTile(
+                      leading: const Icon(Icons.mark_chat_unread,
+                          color: Colors.blue),
+                      title: Text('$unreadCount 則未讀訊息'),
+                      subtitle: const Text('點擊前往即時通訊查看'),
+                      trailing: const Icon(Icons.arrow_forward, size: 16),
+                      onTap: () {
+                        // Switch to Chat Tab (index 1)
+                        // We can't access Shell here easily, but we can navigate to UserList?
+                        // Actually router handles it?
+                        // Or use Shell navigation.
+                        // For now, simple navigation works or better: interact with BottomBar.
+                        // But since we use GoRouter Shell, changing index is hard without context access.
+                        // Let's just push ChatUserListScreen temporary or find a way.
+                        // Pushing screen is fine.
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (c) => const ChatUserListScreen()));
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
 
             // 3. Todo Preview
             Row(

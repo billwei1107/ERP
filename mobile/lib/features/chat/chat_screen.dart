@@ -42,8 +42,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void dispose() {
-    final chatService = ref.read(chatServiceProvider);
-    chatService.disconnect();
+    // Do not disconnect socket here as it is shared with MainScreen/Global
+    // final chatService = ref.read(chatServiceProvider);
+    // chatService.disconnect();
     _controller.dispose();
     super.dispose();
   }
