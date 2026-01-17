@@ -20,6 +20,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
 
+    constructor(private readonly chatService: ChatService) { }
+
     handleConnection(client: Socket) {
         // console.log(`Client connected: ${client.id}`);
         const userId = client.handshake.query.userId;
