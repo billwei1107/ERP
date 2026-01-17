@@ -62,10 +62,10 @@ class AttendanceService {
       // Since list is DESC, the first CLOCK_IN we find is the latest.
       for (var record in records) {
         if (record['type'] == 'CLOCK_IN') {
-          if (lastClockIn == null) lastClockIn = record['time'];
+          lastClockIn ??= record['time'];
         }
         if (record['type'] == 'CLOCK_OUT') {
-          if (lastClockOut == null) lastClockOut = record['time'];
+          lastClockOut ??= record['time'];
         }
       }
 

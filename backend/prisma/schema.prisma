@@ -62,6 +62,9 @@ model Attendance {
   date      DateTime       @db.Date
   
   user      User           @relation(fields: [userId], references: [id])
+
+  @@index([userId, time]) // Optimize "getTodayStatus" and history queries
+  @@index([time])         // Optimize "latest records" or range queries
 }
 
 enum AttendanceType {

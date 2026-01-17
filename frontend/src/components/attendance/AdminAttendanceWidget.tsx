@@ -27,7 +27,7 @@ export const AdminAttendanceWidget = ({ refreshTrigger }: { refreshTrigger?: num
 
         const interval = setInterval(() => {
             loadData();
-        }, 3000); // Poll every 3 seconds
+        }, 15000); // Poll every 15 seconds (Optimized from 3s)
 
         return () => clearInterval(interval);
     }, [refreshTrigger]);
@@ -59,7 +59,16 @@ export const AdminAttendanceWidget = ({ refreshTrigger }: { refreshTrigger?: num
     return (
         <div className={styles.widget}>
             <div className={styles.header}>
-                <h3>員工打卡狀態</h3>
+                <div className="flex items-center gap-2">
+                    <h3>員工打卡狀態</h3>
+                    <button
+                        onClick={() => loadData()}
+                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                        title="重新整理"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" /></svg>
+                    </button>
+                </div>
                 <span className={styles.badge}>{statuses.filter(s => s.lastRecord?.type === 'CLOCK_IN').length} 人在勤</span>
             </div>
             <div className={styles.list}>
