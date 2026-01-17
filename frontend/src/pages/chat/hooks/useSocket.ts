@@ -57,8 +57,13 @@ export const useSocket = () => {
         // Mobile uses http://54.255.186.244:8080/chat
         // Web should probably use same.
 
-        const socket = io('http://54.255.186.244:8080/chat', {
-            path: '/api/socket.io',
+        // If user wants to force remote sync in dev:
+        if (!import.meta.env.PROD) {
+            url = 'http://54.255.186.244:8080/chat';
+        }
+
+        const socket = io(url, {
+            path: path,
             transports: ['websocket'],
             query: { userId: user.id },
             autoConnect: true,
