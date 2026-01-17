@@ -1,47 +1,49 @@
 import { Injectable } from '@nestjs/common';
-// import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TodosService {
-  // constructor(private prisma: PrismaService) {}
-  private todos: any[] = [];
+  constructor(private prisma: PrismaService) { }
 
-  create(userId: number, data: any) {
-    const todo = {
-      id: Math.floor(Math.random() * 10000),
-      userId,
-      title: data.title,
-      description: data.description,
-      dueAt: data.dueAt ? new Date(data.dueAt) : null,
-      isCompleted: false,
-      createdAt: new Date(),
-    };
-    this.todos.push(todo);
-    return todo;
+  async create(userId: number, data: any) {
+    return this.prisma.todo.create({
+      data: {
+        userId,
+        title: data.title,
+        description: data.description,
+        dueAt: data.dueAt ? new Date(data.dueAt) : null,
+      },
+    });
   }
 
-  findAll(userId: number) {
-    return this.todos.filter(t => t.userId === userId);
+  async findAll(userId: number) {
+    return this.prisma.todo.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  findOne(id: number) {
-    return this.todos.find(t => t.id === id);
+  async findOne(id: number) {
+    return this.prisma.todo.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: number, data: any) {
-    const todo = this.todos.find(t => t.id === id);
-    if (todo) {
-      Object.assign(todo, data);
-      if (data.dueAt) todo.dueAt = new Date(data.dueAt);
-    }
-    return todo;
+  async update(id: number, data: any) {
+    return this.prisma.todo.update({
+      where: { id },
+      data: {
+        title: data.title,
+        description: data.description,
+        dueAt: data.dueAt ? new Date(data.dueAt) : undefined,
+        isCompleted: data.isCompleted,
+      },
+    });
   }
 
-  remove(id: number) {
-    const index = this.todos.findIndex(t => t.id === id);
-    if (index > -1) {
-      return this.todos.splice(index, 1)[0];
-    }
-    return null;
+  async remove(id: number) {
+    return this.prisma.todo.delete({
+      where: { id },
+    });
   }
 }
