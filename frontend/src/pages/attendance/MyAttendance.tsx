@@ -118,27 +118,25 @@ export function MyAttendance() {
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-4">
-                    <button
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50"
-                    >
-                        上一頁
-                    </button>
-                    <span className="text-gray-600">
-                        第 {page} 頁 / 共 {totalPages} 頁
-                    </span>
-                    <button
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                        className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50"
-                    >
-                        下一頁
-                    </button>
-                </div>
-            )}
+            <div className="flex justify-center items-center gap-4 mt-4">
+                <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                    上一頁
+                </button>
+                <span className="text-gray-600">
+                    第 {page} 頁 / 共 {totalPages || 1} 頁
+                </span>
+                <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                    下一頁
+                </button>
+            </div>
         </div>
     );
 }
