@@ -11,12 +11,27 @@ export class ChatController {
         @Param('userId') userId: string,
         @Param('otherUserId') otherUserId: string
     ) {
-        try {
-            console.log(`Fetching history for ${userId} and ${otherUserId}`);
-            return await this.chatService.getMessages(Number(userId), Number(otherUserId));
-        } catch (error) {
-            console.error('Failed to fetch history:', error);
-            throw error;
-        }
+        return this.chatService.getMessages(Number(userId), Number(otherUserId));
     }
+
+    @Get('users/:userId')
+    async getChatUsers(@Param('userId') userId: string) {
+        return this.chatService.getChatListWithUsers(Number(userId));
+    }
+
+    @Get('unread/:userId')
+    async getTotalUnread(@Param('userId') userId: string) {
+        const count = await this.chatService.getTotalUnreadCount(Number(userId));
+        return { count };
+    }
+
+    // Using POST for action
+    @Get('read/:myId/:otherUserId') // Actually POST is better, but easy to use GET for now or use @Body
+    async markAsReadGet(@Param('myId') myId: string, @Param('otherUserId') otherUserId: string) {
+        return this.chatService.markMessagesAsRead(Number(myId), Number(otherUserId));
+    }
+
+    // Better REST approach: PATCH /chat/conversations/:myId/:otherId/read
+    // or POST /chat/read
+
 }

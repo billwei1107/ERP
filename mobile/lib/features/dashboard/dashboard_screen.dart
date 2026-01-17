@@ -226,18 +226,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(
         title: const Text('儀表板'),
         automaticallyImplyLeading: false, // Hide back button
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ChatUserListScreen()),
-              );
-            },
-            tooltip: '通訊錄',
-          ),
         ],
       ),
       body: SingleChildScrollView(

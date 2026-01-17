@@ -16,14 +16,17 @@ export const ChatPage: React.FC = () => {
 
     // Fetch users on mount
     useEffect(() => {
+        if (!user) return;
         const fetchUsers = async () => {
             try {
-                const data = await chatService.getUsers();
+                // Fetch sorted list from backend
+                const data = await chatService.getChatUsers(user.id);
+                // Process avatars if needed
                 const processed = data.map(u => ({
                     ...u,
                     avatar: u.avatar || u.name.substring(0, 2).toUpperCase(),
                     status: 'offline' as const
-                })).filter(u => u.id !== user?.id);
+                }));
                 setUsers(processed);
             } catch (error) {
                 console.error('Failed to load users', error);
@@ -38,8 +41,18 @@ export const ChatPage: React.FC = () => {
 
         const loadHistory = async () => {
             try {
-                const history = await chatService.getHistory(selectedUser.id);
+                const history = await chatService.getHistory(user.id, selectedUser.id);
                 setMessages(history);
+
+                // Mark as Read visually
+                if (selectedUser.unreadCount && selectedUser.unreadCount > 0) {
+                    // Call API
+                    chatService.markAsRead(user.id, selectedUser.id);
+                    // Update local state
+                    setUsers(prev => prev.map(u =>
+                        u.id === selectedUser.id ? { ...u, unreadCount: 0 } : u
+                    ));
+                }
             } catch (error) {
                 console.error('Failed to load history', error);
             }
@@ -49,29 +62,52 @@ export const ChatPage: React.FC = () => {
 
     // Socket listener for new messages
     useEffect(() => {
-        if (!socket) return;
+        if (!socket || !user) return;
 
         const handleReceiveMessage = (msg: ChatMessage) => {
-            // Handle Chat Messages
-            const isRelevant =
-                (selectedUser && msg.senderId === selectedUser.id) ||
-                (selectedUser && msg.senderId === user?.id && msg.receiverId === selectedUser.id);
+            // Check if relevant for current chat window
+            const isRelatedToSelection = selectedUser &&
+                (msg.senderId === selectedUser.id || (msg.senderId === user.id && msg.receiverId === selectedUser.id));
 
-            if (isRelevant) {
+            if (isRelatedToSelection) {
                 setMessages(prev => {
                     if (prev.some(m => m.id === msg.id)) return prev;
                     return [...prev, msg];
                 });
+                // If I am receiving and window open, mark as read?
+                // For simplicity, we assume click is needed or auto-read if window open.
+                // If window open, unread count should remain 0.
             }
 
-            // Update lastMessage in UserList
-            setUsers(prevUsers => prevUsers.map(u => {
-                const isChatPartner = (u.id === msg.senderId) || (u.id === msg.receiverId);
-                if (isChatPartner) {
-                    return { ...u, lastMessage: msg.content };
+            // Update User List (Unread Count + Sort)
+            setUsers(prevUsers => {
+                const partnerId = msg.senderId === user.id ? msg.receiverId : msg.senderId;
+                const existing = prevUsers.find(u => u.id === partnerId);
+
+                if (!existing) return prevUsers; // Or fetch user
+
+                // Determine new Unread Count
+                let newUnread = existing.unreadCount || 0;
+                // Increment if I am receiver AND (not selected OR selected but window inactive?)
+                // If selectedUser is this user, checking "isRelatedToSelection".
+                // We should keep unread 0 if selected.
+                if (msg.receiverId === user.id) {
+                    if (selectedUser?.id !== partnerId) {
+                        newUnread++;
+                    }
                 }
-                return u;
-            }));
+
+                const updatedUser = {
+                    ...existing,
+                    lastMessage: msg.content,
+                    lastMessageTime: msg.createdAt, // Backend provides this? or use current time
+                    unreadCount: newUnread
+                };
+
+                // Move to top
+                const others = prevUsers.filter(u => u.id !== partnerId);
+                return [updatedUser, ...others];
+            });
         };
 
         socket.on('receiveMessage', handleReceiveMessage);
@@ -93,12 +129,14 @@ export const ChatPage: React.FC = () => {
         // Send via Socket.IO
         socket.emit('sendMessage', payload);
 
-        // Optimistic UI
-        // Since we receive the echo back from server (via 'receiveMessage' emitted to sender room),
-        // we can rely on that for final ID. But for instant feel:
-        // We'll skip manual addition here and rely on the socket event which should be fast enough (~50ms)
-        // If user complains about lag, we add temp message.
-        // User asked for "Hot Reload" (meaning auto-update).
+        // Optimistic UI for Message List handled by echo or instant add?
+        // Let's add instantly like Mobile
+        // But backend echo (receiveMessage) will handle list update.
+        // Wait, current logic relies on echo for everything.
+        // Echo is fast.
+
+        // But we WANT to move user to top instantly.
+        // handleReceiveMessage will do it when echo arrives.
     };
 
     return (

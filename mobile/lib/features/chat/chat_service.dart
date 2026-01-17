@@ -20,13 +20,43 @@ class ChatService {
 
   ChatService(this._dio);
 
-  // 1. Fetch Users (REST - Unchanged)
+  // 1. Fetch Users with Metadata (Unread/Sort)
+  Future<List<dynamic>> getChatUsers(int myId) async {
+    try {
+      final response = await _dio.get('/chat/users/$myId');
+      return response.data as List<dynamic>;
+    } catch (e) {
+      // Fallback
+      return getUsers();
+    }
+  }
+
+  // Legacy (keep for backup)
   Future<List<dynamic>> getUsers() async {
     try {
       final response = await _dio.get('/users');
       return response.data as List<dynamic>;
     } catch (e) {
       throw Exception('Failed to load users: $e');
+    }
+  }
+
+  // Mark as Read
+  Future<void> markAsRead(int myId, int otherUserId) async {
+    try {
+      await _dio.get('/chat/read/$myId/$otherUserId');
+    } catch (e) {
+      print('Failed to mark read: $e');
+    }
+  }
+
+  // Get Global Unread
+  Future<int> getUnreadCount(int myId) async {
+    try {
+      final response = await _dio.get('/chat/unread/$myId');
+      return response.data['count'] as int;
+    } catch (e) {
+      return 0;
     }
   }
 

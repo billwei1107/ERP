@@ -11,6 +11,8 @@ import { Button } from '../../components/ui/button';
 
 import { useAuth } from '../../lib/auth-context';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSocket } from '../../pages/chat/hooks/useSocket';
+import { chatService } from '../../pages/chat/services/chat.service';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -26,6 +28,50 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         logout();
         navigate('/login');
     };
+
+    const [unreadCount, setUnreadCount] = React.useState(0);
+    const { socket } = useSocket();
+
+    React.useEffect(() => {
+        if (user) {
+            // Fetch initial unread count
+            chatService.getUnreadCount(user.id).then(({ count }) => {
+                setUnreadCount(count);
+            });
+        }
+    }, [user]);
+
+    React.useEffect(() => {
+        if (!socket || !user) return;
+
+        socket.on('receiveMessage', (data) => {
+            if (data.receiverId === user.id) {
+                // If we are not on chat page or not in that conversation... 
+                // Simple logic: Increment. 
+                // Ideally, if on Chat Page, Chat Page will mark as read?
+                // But MainLayout doesn't know. 
+                // We rely on "messagesRead" event OR simple increment.
+                setUnreadCount(prev => prev + 1);
+            }
+        });
+
+        // Listen for Reset event if implemented? 
+        // Can be done via Custom Event or BroadCastChannel if ChatPage marks read.
+
+        return () => {
+            socket.off('receiveMessage');
+        }
+    }, [socket, user]);
+
+    // Listen to route changes to refresh count?
+    React.useEffect(() => {
+        if (location.pathname.startsWith('/chat') && user) {
+            // Re-fetch to clear count if ChatPage marked as read
+            chatService.getUnreadCount(user.id).then(({ count }) => {
+                setUnreadCount(count);
+            });
+        }
+    }, [location.pathname, user]);
 
     return (
         <div className="erp-layout">
@@ -68,10 +114,22 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     </div>
                     <div
                         className={`erp-sidebar__item ${location.pathname.startsWith('/chat') ? 'active' : ''}`}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                         onClick={() => navigate('/chat')}
                     >
-                        即時通訊
+                        <span>即時通訊</span>
+                        {unreadCount > 0 && (
+                            <span style={{
+                                backgroundColor: '#EF4444',
+                                color: 'white',
+                                borderRadius: '9999px',
+                                padding: '0.125rem 0.375rem',
+                                fontSize: '0.75rem',
+                                fontWeight: 500
+                            }}>
+                                {unreadCount}
+                            </span>
+                        )}
                     </div>
 
                     {isAdmin && (

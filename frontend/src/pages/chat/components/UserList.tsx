@@ -43,6 +43,20 @@ export const UserList: React.FC<UserListProps> = ({ users, onSelectUser, selecte
                             <div className="user-name">{user.name}</div>
                             <div className="user-last-message">{user.lastMessage}</div>
                         </div>
+                        {user.unreadCount && user.unreadCount > 0 && (
+                            <div style={{
+                                backgroundColor: '#EF4444',
+                                color: 'white',
+                                borderRadius: '9999px',
+                                padding: '2px 6px',
+                                fontSize: '12px',
+                                marginLeft: '8px',
+                                minWidth: '18px',
+                                textAlign: 'center'
+                            }}>
+                                {user.unreadCount}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

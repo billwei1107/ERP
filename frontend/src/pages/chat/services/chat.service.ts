@@ -7,6 +7,8 @@ export interface ChatUser {
     avatar?: string;
     status: 'online' | 'offline' | 'dnd';
     lastMessage?: string;
+    lastMessageTime?: string;
+    unreadCount?: number;
 }
 
 export interface ChatMessage {
@@ -23,20 +25,23 @@ export interface ChatMessage {
 
 export const chatService = {
     getUsers: async () => {
-        // TODO: This should be a real API call. 
-        // For now, we reuse the existing mock structure but fetch from a real endpoint if available
-        // We will create a new endpoint in Backend: /users/chat-list
+        // Fallback
         return request<ChatUser[]>('/users');
     },
 
-    getHistory: async (otherUserId: number) => {
-        // We need the current user ID. 
-        // The API is /chat/history/:userId/:otherUserId
-        // We can get userId from localStorage 'erp_user' since this is a static service
-        // Or we pass it as arg. Let's rely on AuthContext if we could, but here:
-        const stored = localStorage.getItem('erp_user');
-        const userId = stored ? JSON.parse(stored).id : 0;
+    getChatUsers: async (myId: number) => {
+        return request<ChatUser[]>(`/chat/users/${myId}`);
+    },
 
+    getHistory: async (userId: number, otherUserId: number) => {
         return request<ChatMessage[]>(`/chat/history/${userId}/${otherUserId}`);
+    },
+
+    getUnreadCount: async (userId: number) => {
+        return request<{ count: number }>(`/chat/unread/${userId}`);
+    },
+
+    markAsRead: async (myId: number, otherUserId: number) => {
+        return request(`/chat/read/${myId}/${otherUserId}`);
     }
 };
