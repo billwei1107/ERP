@@ -226,7 +226,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(
         title: const Text('儀表板'),
         automaticallyImplyLeading: false, // Hide back button
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

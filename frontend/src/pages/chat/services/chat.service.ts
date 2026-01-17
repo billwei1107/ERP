@@ -42,6 +42,11 @@ export const chatService = {
     },
 
     markAsRead: async (myId: number, otherUserId: number) => {
-        return request(`/chat/read/${myId}/${otherUserId}`);
+        const res = await request(`/chat/read/${myId}/${otherUserId}`);
+        // Dispatch local event for UI to update
+        window.dispatchEvent(new CustomEvent('chat:read_update', {
+            detail: { userId: myId, otherUserId }
+        }));
+        return res;
     }
 };

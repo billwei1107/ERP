@@ -5,6 +5,13 @@ import 'chat_service.dart';
 import 'chat_screen.dart';
 import 'package:mobile/features/chat/chat_providers.dart';
 
+class ChatUserListScreen extends ConsumerStatefulWidget {
+  const ChatUserListScreen({super.key});
+
+  @override
+  ConsumerState<ChatUserListScreen> createState() => _ChatUserListScreenState();
+}
+
 class _ChatUserListScreenState extends ConsumerState<ChatUserListScreen> {
   int? _currentUserId;
 

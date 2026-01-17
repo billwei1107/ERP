@@ -58,8 +58,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         // Listen for Reset event if implemented? 
         // Can be done via Custom Event or BroadCastChannel if ChatPage marks read.
 
+        const handleReadUpdate = () => {
+            chatService.getUnreadCount(user.id).then(({ count }) => {
+                setUnreadCount(count);
+            });
+        };
+
+        window.addEventListener('chat:read_update', handleReadUpdate);
+
         return () => {
             socket.off('receiveMessage');
+            window.removeEventListener('chat:read_update', handleReadUpdate);
         }
     }, [socket, user]);
 

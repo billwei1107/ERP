@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'chat_service.dart';
+import 'chat_providers.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final int myId;
@@ -28,6 +29,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.initState();
     _loadHistory();
     _connectSocket();
+    _markMessagesAsRead();
+  }
+
+  Future<void> _markMessagesAsRead() async {
+    // Call API
+    final chatService = ref.read(chatServiceProvider);
+    await chatService.markAsRead(widget.myId, widget.otherUser['id']);
+    // Update Global Unread Count (Refresh provider)
+    ref.refresh(unreadCountProvider);
   }
 
   @override

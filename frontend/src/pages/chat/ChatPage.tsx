@@ -74,6 +74,11 @@ export const ChatPage: React.FC = () => {
                     if (prev.some(m => m.id === msg.id)) return prev;
                     return [...prev, msg];
                 });
+
+                // If I am receiver and window is open, mark as read
+                if (msg.receiverId === user.id) {
+                    chatService.markAsRead(user.id, selectedUser!.id);
+                }
                 // If I am receiving and window open, mark as read?
                 // For simplicity, we assume click is needed or auto-read if window open.
                 // If window open, unread count should remain 0.
