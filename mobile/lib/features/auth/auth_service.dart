@@ -52,4 +52,12 @@ class AuthService {
   Future<void> logout() async {
     await _storage.deleteAll();
   }
+
+  Future<Map<String, dynamic>?> getUser() async {
+    final userStr = await _storage.read(key: 'user_session');
+    if (userStr != null) {
+      return jsonDecode(userStr);
+    }
+    return null;
+  }
 }

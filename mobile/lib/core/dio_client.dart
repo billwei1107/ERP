@@ -2,6 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:flutter/foundation.dart'; // import kIsWeb
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final dioClientProvider = Provider<DioClient>((ref) {
+  return DioClient(Dio(), const FlutterSecureStorage());
+});
 
 class DioClient {
   final Dio _dio;
@@ -9,7 +14,8 @@ class DioClient {
 
   DioClient(this._dio, this._storage) {
     // Android Emulator: 10.0.2.2, Web/iOS: localhost
-    const baseUrl = kIsWeb ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
+    // Connect to Remote Server to sync with Website
+    const baseUrl = 'http://54.255.186.244:3000';
 
     _dio.options
       ..baseUrl = baseUrl
