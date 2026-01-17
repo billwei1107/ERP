@@ -80,8 +80,8 @@ class _ChatUserListScreenState extends ConsumerState<ChatUserListScreen> {
                     ),
                   );
                   // Refresh list when coming back
-                  ref.refresh(chatUserListProvider(_currentUserId!));
-                  ref.refresh(unreadCountProvider); // Also refresh global badge
+                  ref.invalidate(chatUserListProvider(_currentUserId!));
+                  ref.refresh(unreadCountProvider); // refresh global badg
                 },
               );
             },

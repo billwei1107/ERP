@@ -82,13 +82,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         if ((receiverId == widget.myId && senderId == widget.otherUser['id']) ||
             (senderId == widget.myId && receiverId == widget.otherUser['id'])) {
           setState(() {
-            // If we optimistically added this message, we might duplicate it if we don't handle ID check.
-            // But simplistic approach: just add it.
-            // Better: Check if we have an optimistic msg with same content/timestamp?
-            // For now, let's just append. Use IDs to verify in future.
             _messages.add(data);
           });
           _scrollToBottom();
+
+          // If I am receiving from this user while chat is open, mark as read immediately
+          if (receiverId == widget.myId) {
+            _markMessagesAsRead();
+          }
         }
       }
     });
