@@ -4,29 +4,112 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  deploy:
+  # ==========================================================
+  # Continuous Integration (Build & Test)
+  # ==========================================================
+  ci-backend:
+    name: Check Backend (NestJS)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      - name: Install Dependencies
+        run: cd backend && npm ci
+      - name: Build
+        run: cd backend && npm run build
 
-      # Using simple SSH deployment since we already have Docker on the server
-      # Ideally we build images here and push to ECR, but for simplicity/cost:
-      # We will just ssh into server, git pull, and docker compose up.
-      
+  ci-frontend:
+    name: Check Frontend (Vite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install Dependencies
+        run: cd frontend && npm ci
+      - name: Build
+        run: cd frontend && npm run build
+
+  ci-chat:
+    name: Check Chat Service (Go)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: Build
+        run: cd chat-service && go build -v ./...
+
+  # ==========================================================
+  # Continuous Deployment (Deploy to Server)
+  # ==========================================================
+  deploy:
+    name: Deploy to EC2
+    needs: [ci-backend, ci-frontend, ci-chat]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST }} # 54.255.186.244
-          username: ${{ secrets.USERNAME }} # ec2-user
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          # password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT || 22 }}
+          script_stop: true # Stop script on first error
           script: |
-            cd /opt/erp
-            git pull
-            # Rebuild ensures new services (chat-service) are built
-            docker compose --env-file .env -f docker/prod/compose.yaml up -d --build
-            # Prune old images to save space
+            # 1. Define Project Path
+            PROJECT_DIR="/opt/erp"
+            
+            # 2. Ensure Directory Exists
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo "Project directory not found. Cloning..."
+              # Assuming git is setup or public, otherwise this might need auth
+              # For now, we assume the directory exists as per previous logic, 
+              # but creating it is safer if we knew the repo URL.
+              mkdir -p "$PROJECT_DIR"
+            fi
+
+            cd $PROJECT_DIR
+
+            # 3. Pull Latest Code
+            # Resetting to ensure no local changes conflict
+            echo "Fetching latest code..."
+            git fetch --all
+            git reset --hard origin/master
+
+            # 4. Create .env file from Secrets
+            # This ensures the server always has the correct env vars from GitHub
+            echo "Creating .env file..."
+            cat <<EOF > .env
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            # Add other secrets here if needed, mapped to env vars expected by docker-compose
+            # The compose file uses:
+            # - POSTGRES_PASSWORD=\${DB_PASSWORD}
+            # - DATABASE_URL=postgresql://postgres:\${DB_PASSWORD}@postgres:5432/erp_db
+            EOF
+
+            # 5. Docker Compose Up
+            echo "Starting services..."
+            # We use the prod compose file. --build ensures images are rebuilt with new code.
+            docker compose --env-file .env -f docker/prod/compose.yaml up -d --build --remove-orphans
+
+            # 6. Cleanup
+            echo "Cleaning up..."
             docker image prune -f
