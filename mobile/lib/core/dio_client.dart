@@ -13,13 +13,19 @@ class DioClient {
 
   DioClient(this._dio, this._storage) {
     // Android Emulator: 10.0.2.2, Web/iOS: localhost
-    // Connect to Remote Server to sync with Website
-    const baseUrl = 'http://54.255.186.244:3000';
+    // Connect to Remote Server (ERP System Port 8080 -> Backend /api)
+    const baseUrl = 'http://54.255.186.244:8080/api';
 
     _dio.options
       ..baseUrl = baseUrl
-      ..connectTimeout = const Duration(seconds: 5)
-      ..receiveTimeout = const Duration(seconds: 3);
+      ..connectTimeout = const Duration(seconds: 10)
+      ..receiveTimeout = const Duration(seconds: 10);
+
+    // Logging (Helpful for debugging)
+    _dio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+    ));
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {

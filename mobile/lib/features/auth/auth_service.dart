@@ -26,7 +26,8 @@ class AuthService {
   Future<Map<String, dynamic>> login(String account, String password) async {
     try {
       final response = await _dio.post('/auth/login', data: {
-        'account': account, // Backend expects 'account'
+        'account':
+            account, // Backend UsersController expects 'account' (Email or EmpID)
         'password': password,
       });
 
