@@ -77,9 +77,9 @@ class ChatService {
     _socket = IO.io(
       'http://54.255.186.244:8080/chat', // Nginx Port + Namespace
       IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .setPath('/api/socket.io') // Map /api/socket.io -> backend/socket.io
-          .setQuery({'userId': userId})
+          .setTransports(['websocket', 'polling']) // Allow polling fallback
+          .setPath('/api/socket.io')
+          .setQuery({'userId': userId.toString()}) // Explicit string
           .disableAutoConnect()
           .build(),
     );
