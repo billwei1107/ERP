@@ -12,6 +12,7 @@ RUN npm install
 COPY backend/ .
 
 # Build
+RUN npx prisma generate
 RUN npm run build
 
 # Production Stage
