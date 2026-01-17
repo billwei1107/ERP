@@ -48,26 +48,35 @@ export class AttendanceService {
     });
   }
 
-  async getMonthlyStatus(userId: number | undefined, year: number, month: number) {
+  async getMonthlyStatus(userId: number | undefined, year: number, month: number, page: number = 1, limit: number = 15) {
     // Construct date range for the month
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
-    return this.prisma.attendance.findMany({
-      where: {
-        ...(userId ? { userId } : {}), // Filter by userId only if provided
-        time: {
-          gte: startDate,
-          lte: endDate,
+    const where = {
+      ...(userId ? { userId } : {}), // Filter by userId only if provided
+      time: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.attendance.findMany({
+        where,
+        orderBy: {
+          time: 'desc',
         },
-      },
-      orderBy: {
-        time: 'desc',
-      },
-      include: {
-        user: true, // Include user details for admin view
-      }
-    });
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          user: true, // Include user details for admin view
+        }
+      }),
+      this.prisma.attendance.count({ where })
+    ]);
+
+    return { data, total };
   }
 
   async findAll() {

@@ -30,11 +30,15 @@ export class AttendanceController {
     @Query('userId') userId: string,
     @Query('year') year: string,
     @Query('month') month: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '15',
   ) {
     return this.attendanceService.getMonthlyStatus(
       userId ? +userId : undefined,
       +year,
-      +month
+      +month,
+      +page,
+      +limit
     );
   }
 }

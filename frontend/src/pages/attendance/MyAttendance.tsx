@@ -11,22 +11,40 @@ interface AttendanceRecord {
     date: string;
 }
 
+interface AttendanceResponse {
+    data: AttendanceRecord[];
+    total: number;
+}
+
 export function MyAttendance() {
     const { user } = useAuth();
     const [records, setRecords] = useState<AttendanceRecord[]>([]);
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
 
+    // Pagination State
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
     useEffect(() => {
         if (user) loadRecords();
-    }, [user, year, month]);
+    }, [user, year, month, page]);
 
     const loadRecords = async () => {
         if (!user) return;
         try {
-            const data = await request<AttendanceRecord[]>(`/attendance/month?userId=${user.id}&year=${year}&month=${month}`);
-            // Sort by time descending
-            setRecords(data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()));
+            const queryParams = new URLSearchParams({
+                userId: user.id.toString(),
+                year: year.toString(),
+                month: month.toString(),
+                page: page.toString(),
+                limit: '15'
+            });
+
+            const response = await request<AttendanceResponse>(`/attendance/month?${queryParams}`);
+
+            setRecords(response.data);
+            setTotalPages(Math.ceil(response.total / 15));
         } catch (err) {
             console.error(err);
         }
@@ -40,7 +58,10 @@ export function MyAttendance() {
                 <div className="flex gap-2">
                     <select
                         value={year}
-                        onChange={e => setYear(+e.target.value)}
+                        onChange={e => {
+                            setYear(+e.target.value);
+                            setPage(1);
+                        }}
                         className="p-2 border rounded"
                     >
                         {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
@@ -49,7 +70,10 @@ export function MyAttendance() {
                     </select>
                     <select
                         value={month}
-                        onChange={e => setMonth(+e.target.value)}
+                        onChange={e => {
+                            setMonth(+e.target.value);
+                            setPage(1);
+                        }}
                         className="p-2 border rounded"
                     >
                         {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
@@ -59,7 +83,7 @@ export function MyAttendance() {
                 </div>
             </div>
 
-            <div className="card overflow-hidden">
+            <div className="card overflow-hidden mb-4">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50 border-b">
                         <tr>
@@ -92,6 +116,29 @@ export function MyAttendance() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-4">
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50"
+                    >
+                        上一頁
+                    </button>
+                    <span className="text-gray-600">
+                        第 {page} 頁 / 共 {totalPages} 頁
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                        className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50"
+                    >
+                        下一頁
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
