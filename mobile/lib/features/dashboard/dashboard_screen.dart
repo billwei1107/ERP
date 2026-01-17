@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/attendance/attendance_service.dart';
 import 'package:mobile/features/auth/auth_service.dart';
+import 'package:mobile/features/todo/todo_model.dart';
+import 'package:mobile/features/todo/todo_service.dart';
+import 'package:mobile/features/todo/todo_screen.dart';
+import 'package:mobile/features/todo/add_todo_dialog.dart';
+import 'package:mobile/features/chat/chat_user_list_screen.dart';
+import 'package:intl/intl.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -13,6 +19,8 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   String? _userName;
   Map<String, dynamic>? _attendanceStatus;
+  List<Todo> _recentTodos = [];
+  int _remainingTodoCount = 0;
   bool _isLoading = false;
 
   @override
@@ -35,6 +43,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         final userId =
             user['id'] is int ? user['id'] : int.parse(user['id'].toString());
         _fetchAttendanceStatus(userId);
+        _fetchRecentTodos(userId);
       }
     } catch (e) {
       debugPrint('Error loading initial data: $e');
@@ -52,6 +61,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       }
     } catch (e) {
       debugPrint('Error fetching attendance in UI: $e');
+    }
+  }
+
+  Future<void> _fetchRecentTodos(int userId) async {
+    try {
+      final service = ref.read(todoServiceProvider);
+      final todos = await service.getTodos(userId);
+      // Take top 2 uncompleted
+      final uncompleted = todos.where((t) => !t.isCompleted).toList();
+      final recent = uncompleted.take(2).toList();
+      final remaining = uncompleted.length - recent.length;
+
+      if (mounted) {
+        setState(() {
+          _recentTodos = recent;
+          _remainingTodoCount = remaining;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching todos in UI: $e');
     }
   }
 
@@ -96,6 +125,85 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
+  Future<void> _toggleTodo(Todo todo) async {
+    final newState = !todo.isCompleted;
+
+    // 1. Optimistic Update
+    setState(() {
+      final index = _recentTodos.indexWhere((t) => t.id == todo.id);
+      if (index != -1) {
+        // Create new object with updated status
+        _recentTodos[index] = Todo(
+          id: todo.id,
+          userId: todo.userId,
+          title: todo.title,
+          description: todo.description,
+          dueAt: todo.dueAt,
+          isCompleted: newState,
+          createdAt: todo.createdAt,
+        );
+      }
+    });
+
+    try {
+      final service = ref.read(todoServiceProvider);
+      await service.updateTodo(todo.id, {'isCompleted': newState});
+
+      // 2. If completed, wait 5s then refres (which will remove it since we only fetch uncompleted)
+      if (newState) {
+        Future.delayed(const Duration(seconds: 5), () {
+          if (mounted) {
+            // Re-fetching will filter out the completed item
+            final userId = _recentTodos
+                .firstWhere((t) => t.id == todo.id, orElse: () => todo)
+                .userId;
+            _fetchRecentTodos(userId);
+          }
+        });
+      }
+    } catch (e) {
+      // Revert
+      final userId = _recentTodos
+          .firstWhere((t) => t.id == todo.id, orElse: () => todo)
+          .userId;
+      _fetchRecentTodos(userId);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('更新失敗: $e')));
+      }
+    }
+  }
+
+  Future<void> _showQuickAddDialog() async {
+    showAddTodoDialog(
+      context: context,
+      onAdd: (title, description, dueAt) async {
+        try {
+          final authService = ref.read(authServiceProvider);
+          final user = await authService.getUser();
+          if (user == null) return;
+          final userId =
+              user['id'] is int ? user['id'] : int.parse(user['id'].toString());
+
+          final service = ref.read(todoServiceProvider);
+          await service.createTodo(userId, title,
+              description: description, dueAt: dueAt);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('新增成功')));
+            _fetchRecentTodos(userId); // Refresh preview
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('新增失敗: $e')));
+          }
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Show LATEST Clock In time if available
@@ -120,8 +228,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         automaticallyImplyLeading: false, // Hide back button
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ChatUserListScreen()),
+              );
+            },
+            tooltip: '通訊錄',
           ),
         ],
       ),
@@ -243,11 +358,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '待辦事項',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    const Text(
+                      '待辦事項',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle, color: Colors.blue),
+                      onPressed: _showQuickAddDialog,
+                      tooltip: '快速新增',
+                    ),
+                  ],
                 ),
-                TextButton(onPressed: () {}, child: const Text('查看全部')),
+                TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const TodoScreen()),
+                      ).then((_) {
+                        // Refresh when returning from TodoScreen
+                        _loadInitialData();
+                      });
+                    },
+                    child: const Text('查看全部')),
               ],
             ),
             _buildTodoPreview(),
@@ -268,25 +404,75 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildTodoPreview() {
+    if (_recentTodos.isEmpty) {
+      return const Card(
+        child: ListTile(
+          title: Text('目前沒有待辦事項'),
+          subtitle: Text('點擊「查看全部」新增第一個待辦'),
+        ),
+      );
+    }
+
     return Card(
       elevation: 1,
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(Icons.check_circle_outline),
-            title: const Text('完成庫存盤點'),
-            subtitle: const Text('今日 14:00 截止'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.radio_button_unchecked),
-            title: const Text('財務報表審核'),
-            subtitle: const Text('明日 10:00'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
-          ),
+          ..._recentTodos.map((todo) {
+            return Column(
+              children: [
+                ListTile(
+                  leading: IconButton(
+                    icon: Icon(
+                      todo.isCompleted
+                          ? Icons.check_circle_outline
+                          : Icons.radio_button_unchecked,
+                      color: todo.isCompleted ? Colors.green : Colors.grey,
+                    ),
+                    onPressed: () => _toggleTodo(todo),
+                    tooltip: '標記為完成',
+                  ),
+                  title: Text(
+                    todo.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      decoration:
+                          todo.isCompleted ? TextDecoration.lineThrough : null,
+                    ),
+                  ),
+                  subtitle: todo.dueAt != null
+                      ? Text(
+                          DateFormat('MM/dd HH:mm')
+                              .format(todo.dueAt!.toLocal()),
+                          style: TextStyle(
+                              color: todo.dueAt!.isBefore(DateTime.now()) &&
+                                      !todo.isCompleted
+                                  ? Colors.red
+                                  : Colors.grey),
+                        )
+                      : null,
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TodoScreen()),
+                    ).then((_) => _loadInitialData());
+                  },
+                ),
+                if (todo != _recentTodos.last || _remainingTodoCount > 0)
+                  const Divider(height: 1),
+              ],
+            );
+          }).toList(),
+          if (_remainingTodoCount > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                '還有 $_remainingTodoCount 個待辦事項沒顯示...',
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              ),
+            ),
         ],
       ),
     );

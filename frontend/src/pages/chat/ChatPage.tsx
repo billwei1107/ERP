@@ -19,12 +19,11 @@ export const ChatPage: React.FC = () => {
         const fetchUsers = async () => {
             try {
                 const data = await chatService.getUsers();
-                // Transform data if needed, e.g. generate avatars
                 const processed = data.map(u => ({
                     ...u,
                     avatar: u.avatar || u.name.substring(0, 2).toUpperCase(),
-                    status: 'offline' as const // Default to offline for now
-                })).filter(u => u.id !== user?.id); // Exclude self
+                    status: 'offline' as const
+                })).filter(u => u.id !== user?.id);
                 setUsers(processed);
             } catch (error) {
                 console.error('Failed to load users', error);
@@ -52,65 +51,33 @@ export const ChatPage: React.FC = () => {
     useEffect(() => {
         if (!socket) return;
 
-        socket.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
+        const handleReceiveMessage = (msg: ChatMessage) => {
+            // Handle Chat Messages
+            const isRelevant =
+                (selectedUser && msg.senderId === selectedUser.id) ||
+                (selectedUser && msg.senderId === user?.id && msg.receiverId === selectedUser.id);
 
-                // Handle Status Updates
-                if (data.type === 'status_update') {
-                    const { userId, status } = data;
-                    setUsers(prevUsers => prevUsers.map(u => {
-                        // userId from Go is string, ours is number
-                        if (String(u.id) === String(userId)) {
-                            // If user is DND, do not override with online/offline unless the update IS 'dnd'
-                            // But for now, let's just trust the server.
-                            // If we implement DND, we need to persist it.
-                            return { ...u, status: status };
-                        }
-                        return u;
-                    }));
-                    return;
-                }
-
-                // Handle Chat Messages
-                const msg: ChatMessage = data;
-
-                // Only append if it belongs to the current conversation
-                // msg.senderId is the other person (or self if echoed)
-                // msg.receiverId is self (or other if echoed)
-
-                // If the message is from the selected user OR sent by me to the selected user
-                // (Note: Go service might broadcast echoed messages back to sender)
-                const isRelevant =
-                    (selectedUser && msg.senderId === selectedUser.id) ||
-                    (selectedUser && msg.senderId === user?.id && msg.receiverId === selectedUser.id);
-
-                if (isRelevant) {
-                    setMessages(prev => {
-                        // Dedup if optimistic UI already added it
-                        if (prev.some(m => m.id === msg.id)) return prev;
-                        return [...prev, msg];
-                    });
-                }
-
-                // Update lastMessage in UserList
-                setUsers(prevUsers => prevUsers.map(u => {
-                    const isChatPartner = (u.id === msg.senderId) || (u.id === msg.receiverId);
-                    if (isChatPartner) {
-                        return { ...u, lastMessage: msg.content };
-                    }
-                    return u;
-                }));
-            } catch (e) {
-                console.error('Failed to parse websocket message', e);
+            if (isRelevant) {
+                setMessages(prev => {
+                    if (prev.some(m => m.id === msg.id)) return prev;
+                    return [...prev, msg];
+                });
             }
+
+            // Update lastMessage in UserList
+            setUsers(prevUsers => prevUsers.map(u => {
+                const isChatPartner = (u.id === msg.senderId) || (u.id === msg.receiverId);
+                if (isChatPartner) {
+                    return { ...u, lastMessage: msg.content };
+                }
+                return u;
+            }));
         };
 
-        // socket.on('receiveMessage', handleReceiveMessage); is deprecated
+        socket.on('receiveMessage', handleReceiveMessage);
 
         return () => {
-            // socket cleanup handled in hook usually, accessing onmessage directly overlaps
-            socket.onmessage = null;
+            socket.off('receiveMessage', handleReceiveMessage);
         };
     }, [socket, selectedUser, user]);
 
@@ -123,25 +90,15 @@ export const ChatPage: React.FC = () => {
             content
         };
 
-        // Send via WebSocket
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(payload));
-        } else {
-            console.warn('Socket not open');
-        }
+        // Send via Socket.IO
+        socket.emit('sendMessage', payload);
 
-        // socket.emit('sendMessage', payload);
-
-        // Optimistic update removed to avoid duplication since server echoes back
-        // setMessages(prev => [...prev, tempMsg]);
-
-        // However, we still update the user list's last message for immediate feedback
-        setUsers(prevUsers => prevUsers.map(u => {
-            if (u.id === selectedUser.id) {
-                return { ...u, lastMessage: content };
-            }
-            return u;
-        }));
+        // Optimistic UI
+        // Since we receive the echo back from server (via 'receiveMessage' emitted to sender room),
+        // we can rely on that for final ID. But for instant feel:
+        // We'll skip manual addition here and rely on the socket event which should be fast enough (~50ms)
+        // If user complains about lag, we add temp message.
+        // User asked for "Hot Reload" (meaning auto-update).
     };
 
     return (

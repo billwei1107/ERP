@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:mobile/features/auth/login_screen.dart';
 import 'package:mobile/features/dashboard/dashboard_screen.dart';
-import 'package:mobile/features/chat/chat_screen.dart';
+import 'package:mobile/features/chat/chat_user_list_screen.dart';
 import 'package:mobile/features/finance/finance_screen.dart';
 import 'package:mobile/features/inventory/inventory_screen.dart';
 import 'package:mobile/features/others/others_screen.dart';
@@ -38,7 +38,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/chat',
-              builder: (context, state) => const ChatScreen(),
+              builder: (context, state) => const ChatUserListScreen(),
             ),
           ],
         ),

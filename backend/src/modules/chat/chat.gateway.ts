@@ -20,30 +20,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
 
-    // Map to store userId -> socketId
-    private connectedUsers = new Map<number, string>();
-
-    constructor(private readonly chatService: ChatService) { }
-
     handleConnection(client: Socket) {
-        console.log(`Client connected: ${client.id}`);
+        // console.log(`Client connected: ${client.id}`);
         const userId = client.handshake.query.userId;
         if (userId) {
-            this.connectedUsers.set(Number(userId), client.id);
-            console.log(`User ${userId} registered with socket ${client.id}`);
-            // Broadcast user status update?
+            const roomName = `user_${userId}`;
+            client.join(roomName);
+            // console.log(`User ${userId} joined room ${roomName}`);
         }
     }
 
     handleDisconnect(client: Socket) {
-        console.log(`Client disconnected: ${client.id}`);
-        // Remove user
-        for (const [userId, socketId] of this.connectedUsers.entries()) {
-            if (socketId === client.id) {
-                this.connectedUsers.delete(userId);
-                break;
-            }
-        }
+        // console.log(`Client disconnected: ${client.id}`);
     }
 
     @SubscribeMessage('sendMessage')
@@ -51,7 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @MessageBody() payload: { senderId: number; receiverId: number; content: string },
         @ConnectedSocket() client: Socket,
     ) {
-        console.log('Received message:', payload);
+        // console.log('Received message:', payload);
 
         // Save to DB
         const savedMessage = await this.chatService.saveMessage(
@@ -60,15 +48,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             payload.content,
         );
 
-        // Emit to receiver if online
-        const receiverSocketId = this.connectedUsers.get(payload.receiverId);
-        if (receiverSocketId) {
-            this.server.to(receiverSocketId).emit('receiveMessage', savedMessage);
-        }
+        // Emit to receiver room (all receiver's devices)
+        this.server.to(`user_${payload.receiverId}`).emit('receiveMessage', savedMessage);
 
-        // Also emit back to sender (confirm saved) or just let frontend handle optimistic UI?
-        // Usually sender adds optimally, but receiving the official object is good.
-        // client.emit('receiveMessage', savedMessage); // Optional if frontend needs it
+        // Emit to sender room (all sender's devices, including the one that sent it if not careful, but useful for other tabs)
+        // Note: The sender client usually handles its own display optimistically, 
+        // but syncing other tabs/devices of sender is good.
+        this.server.to(`user_${payload.senderId}`).emit('receiveMessage', savedMessage);
 
         return savedMessage;
     }
