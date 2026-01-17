@@ -37,7 +37,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatService = ref.read(chatServiceProvider);
     await chatService.markAsRead(widget.myId, widget.otherUser['id']);
     // Update Global Unread Count (Refresh provider)
-    ref.refresh(unreadCountProvider);
+    ref.invalidate(unreadCountProvider);
   }
 
   @override

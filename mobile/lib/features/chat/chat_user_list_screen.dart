@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/auth/auth_service.dart';
-import 'chat_service.dart';
+
 import 'chat_screen.dart';
 import 'package:mobile/features/chat/chat_providers.dart';
 
@@ -81,7 +81,7 @@ class _ChatUserListScreenState extends ConsumerState<ChatUserListScreen> {
                   );
                   // Refresh list when coming back
                   ref.invalidate(chatUserListProvider(_currentUserId!));
-                  ref.refresh(unreadCountProvider); // refresh global badg
+                  ref.invalidate(unreadCountProvider); // refresh global badge
                 },
               );
             },

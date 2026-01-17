@@ -51,7 +51,7 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
         // Increment global badge
         ref.read(unreadCountProvider.notifier).state++;
         // Refresh list to re-sort
-        ref.refresh(chatUserListProvider(_myId!));
+        ref.invalidate(chatUserListProvider(_myId!));
       }
     });
 
@@ -81,7 +81,7 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
 
           // If going to Chat Tab, refresh list
           if (index == 1 && _myId != null) {
-            ref.refresh(chatUserListProvider(_myId!));
+            ref.invalidate(chatUserListProvider(_myId!));
           }
         },
         destinations: [
