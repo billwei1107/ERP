@@ -36,8 +36,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Call API
     final chatService = ref.read(chatServiceProvider);
     await chatService.markAsRead(widget.myId, widget.otherUser['id']);
-    // Update Global Unread Count (Refresh provider)
-    ref.invalidate(unreadCountProvider);
+    // Update Global Unread Count (Fetch from API)
+    try {
+      final count = await chatService.getUnreadCount(widget.myId);
+      if (mounted) {
+        ref.read(unreadCountProvider.notifier).state = count;
+      }
+    } catch (e) {
+      debugPrint('Failed to refresh unread count: $e');
+    }
   }
 
   @override
