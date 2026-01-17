@@ -61,7 +61,8 @@ export function AttendanceWidget({ onSuccess }: Props) {
         }
     };
 
-    const lastRecord = status.length > 0 ? status[status.length - 1] : null;
+    // Backend returns data sorted by time DESC (newest first)
+    const lastRecord = status.length > 0 ? status[0] : null;
     const isClockedIn = lastRecord?.type === 'CLOCK_IN';
 
     return (
