@@ -66,7 +66,7 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     });
 
     // Debug Ping
-    _socket?.emit('ping', {'userId': _myId});
+    socket.emit('ping', {'userId': _myId});
 
     // Also listen to 'messagesRead' if we implement it for cross-device sync
   }
