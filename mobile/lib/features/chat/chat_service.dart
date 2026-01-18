@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/core/dio_client.dart';
 // ignore: library_prefixes
@@ -46,7 +47,7 @@ class ChatService {
     try {
       await _dio.get('/chat/read/$myId/$otherUserId');
     } catch (e) {
-      print('Failed to mark read: $e');
+      debugPrint('Failed to mark read: $e');
     }
   }
 
@@ -87,12 +88,13 @@ class ChatService {
     _socket!.connect();
 
     _socket!.onConnect((_) {
-      print('Socket Connected');
+      // debugPrint('Socket Connected');
     });
 
-    _socket!.onDisconnect((_) => print('Socket Disconnected'));
-    _socket!.onConnectError((data) => print('Socket Connect Error: $data'));
-    _socket!.onError((data) => print('Socket Error: $data'));
+    _socket!.onDisconnect((_) => debugPrint('Socket Disconnected'));
+    _socket!
+        .onConnectError((data) => debugPrint('Socket Connect Error: $data'));
+    _socket!.onError((data) => debugPrint('Socket Error: $data'));
 
     return _socket!;
   }
