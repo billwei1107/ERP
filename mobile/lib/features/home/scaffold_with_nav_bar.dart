@@ -46,8 +46,17 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     final socket = chatService.connect(_myId!);
 
     socket.on('receiveMessage', (data) {
+      debugPrint('SCAFFOLD RECEIVE: $data'); // Global debug log
+
+      final receiverId = data['receiverId'];
+      final myIdStr = _myId.toString();
+      final receiverIdStr = receiverId?.toString();
+
+      debugPrint('Check: $receiverIdStr == $myIdStr');
+
       // If I am the receiver
-      if (data['receiverId'] == _myId) {
+      if (receiverIdStr == myIdStr) {
+        debugPrint('MATCH! Updating badge!');
         // Increment global badge
         ref.read(unreadCountProvider.notifier).state++;
         // Refresh list to re-sort
@@ -62,6 +71,8 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
             ),
           );
         }
+      } else {
+        debugPrint('NO MATCH');
       }
     });
 
