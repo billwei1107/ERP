@@ -52,8 +52,21 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
         ref.read(unreadCountProvider.notifier).state++;
         // Refresh list to re-sort
         ref.invalidate(chatUserListProvider(_myId!));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('收到新訊息! 未讀: ${ref.read(unreadCountProvider)}'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     });
+
+    // Debug Ping
+    _socket?.emit('ping', {'userId': _myId});
 
     // Also listen to 'messagesRead' if we implement it for cross-device sync
   }
