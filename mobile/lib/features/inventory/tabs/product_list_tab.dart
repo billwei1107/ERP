@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../inventory_providers.dart';
+import '../inventory_service.dart';
 import '../dialogs/add_product_dialog.dart';
 
 class ProductListTab extends ConsumerWidget {
