@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/core/dio_client.dart';
@@ -107,6 +108,32 @@ class InventoryService {
       return response.data as List<dynamic>;
     } catch (e) {
       return []; // Return empty on error to avoid breaking UI
+    }
+  }
+
+  // 5. Import / Export
+  Future<List<int>> exportInventory() async {
+    try {
+      final response = await _dio.get(
+        '/inventory/export',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to export inventory: $e');
+    }
+  }
+
+  Future<void> importInventory(File file) async {
+    try {
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: fileName),
+      });
+
+      await _dio.post('/inventory/import', data: formData);
+    } catch (e) {
+      throw Exception('Failed to import inventory: $e');
     }
   }
 }

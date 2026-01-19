@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 import { InventoryService } from './inventory.service';
 
 @Controller('inventory')
@@ -73,5 +76,23 @@ export class InventoryController {
   @Patch('stock-takes/:id/items')
   updateStockTakeItems(@Param('id') id: string, @Body() body: { items: any[] }) {
     return this.inventoryService.updateStockTakeItems(+id, body.items);
+  }
+
+  @Get('export')
+  async export(@Res() res: Response, @Query('format') format: 'xlsx' | 'csv' = 'xlsx') {
+    const buffer = await this.inventoryService.exportInventory(format);
+    res.set({
+      'Content-Type': format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="inventory.${format}"`,
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  async import(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    return this.inventoryService.importInventory(file.buffer);
   }
 }

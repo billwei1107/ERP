@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/dio_client.dart';
 import 'package:dio/dio.dart';
@@ -38,6 +39,31 @@ class FinanceService {
 
   Future<void> deleteTransaction(int id) async {
     await _dio.delete('/finance/transactions/$id');
+  }
+
+  Future<List<int>> exportTransactions() async {
+    try {
+      final response = await _dio.get(
+        '/finance/export',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to export transactions: $e');
+    }
+  }
+
+  Future<void> importTransactions(File file) async {
+    try {
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: fileName),
+      });
+
+      await _dio.post('/finance/import', data: formData);
+    } catch (e) {
+      throw Exception('Failed to import transactions: $e');
+    }
   }
 }
 

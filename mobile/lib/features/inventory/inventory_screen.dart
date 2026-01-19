@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'tabs/product_list_tab.dart';
 import 'tabs/movement_list_tab.dart';
 import 'tabs/stock_take_list_tab.dart';
+import 'inventory_providers.dart';
+import 'inventory_service.dart';
+import '../../core/file_service.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -32,6 +35,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('庫存管理'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) => _handleMenuSelection(context, ref, value),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                  value: 'export_xlsx', child: Text('匯出 Excel')),
+              const PopupMenuItem(value: 'import', child: Text('匯入商品')),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -50,5 +63,35 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _handleMenuSelection(
+      BuildContext context, WidgetRef ref, String value) async {
+    final fileService = ref.read(fileServiceProvider);
+    final inventoryService = ref.read(inventoryServiceProvider);
+
+    try {
+      if (value == 'export_xlsx') {
+        final bytes = await inventoryService.exportInventory();
+        await fileService.saveAndShareFile(
+            'inventory_export_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+            bytes);
+      } else if (value == 'import') {
+        final file = await fileService.pickFile();
+        if (file != null) {
+          await inventoryService.importInventory(file);
+          ref.refresh(productsProvider); // Refresh list
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('匯入成功')));
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('操作失敗: $e')));
+      }
+    }
   }
 }

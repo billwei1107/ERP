@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import * as XLSX from 'xlsx';
 
 @Injectable()
 export class InventoryService {
@@ -347,6 +348,137 @@ export class InventoryService {
         safetyStock: true
       }
     });
+  }
+
+
+  // Import / Export
+  async exportInventory(format: 'xlsx' | 'csv' = 'xlsx') {
+    const products = await this.prisma.product.findMany({
+      include: { locations: true }
+    });
+
+    // Flatten data for export
+    const data = products.map(p => {
+      const locationStr = p.locations.map(l => `${l.location}:${l.quantity}`).join('; ');
+      return {
+        ID: p.id,
+        SKU: p.sku,
+        Name: p.name,
+        Category: p.category,
+        Unit: p.unit,
+        SafetyStock: p.safetyStock,
+        TotalStock: p.totalStock,
+        Locations: locationStr
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
+
+    if (format === 'csv') {
+      return XLSX.write(workbook, { type: 'buffer', bookType: 'csv' });
+    } else {
+      return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    }
+  }
+
+  async importInventory(fileBuffer: Buffer) {
+    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(sheet);
+
+    let created = 0;
+    let updated = 0;
+    let errors = 0;
+
+    for (const row of data as any[]) {
+      try {
+        if (!row.Name || !row.Category) continue;
+
+        // Basic fields
+        const sku = row.SKU ? String(row.SKU) : `AUTO-${Date.now()}`; // Fallback if no SKU
+
+        // Find existing by SKU or Name
+        let product = await this.prisma.product.findFirst({
+          where: {
+            OR: [
+              { sku: sku },
+              { name: String(row.Name) }
+            ]
+          }
+        });
+
+        if (product) {
+          // Update
+          await this.prisma.product.update({
+            where: { id: product.id },
+            data: {
+              name: String(row.Name),
+              category: String(row.Category),
+              unit: row.Unit ? String(row.Unit) : product.unit,
+              safetyStock: row.SafetyStock ? Number(row.SafetyStock) : product.safetyStock,
+            }
+          });
+          updated++;
+        } else {
+          // Create
+          product = await this.prisma.product.create({
+            data: {
+              sku: sku,
+              name: String(row.Name),
+              category: String(row.Category),
+              unit: row.Unit ? String(row.Unit) : '個',
+              safetyStock: row.SafetyStock ? Number(row.SafetyStock) : 10,
+              totalStock: 0
+            }
+          });
+          created++;
+        }
+
+        // Handle Locations string "A1:10; B2:5"
+        if (row.Locations) {
+          const locParts = String(row.Locations).split(';').map(s => s.trim());
+          let newTotal = 0;
+
+          for (const part of locParts) {
+            const [locName, qtyStr] = part.split(':');
+            if (locName && qtyStr) {
+              const qty = Number(qtyStr);
+
+              // Upsert location
+              const locEntry = await this.prisma.productLocation.findUnique({
+                where: { productId_location: { productId: product.id, location: locName } }
+              });
+
+              if (locEntry) {
+                await this.prisma.productLocation.update({
+                  where: { id: locEntry.id },
+                  data: { quantity: qty }
+                });
+              } else {
+                await this.prisma.productLocation.create({
+                  data: { productId: product.id, location: locName, quantity: qty }
+                });
+              }
+              newTotal += qty;
+            }
+          }
+          // Sync total
+          await this.prisma.product.update({
+            where: { id: product.id },
+            data: { totalStock: newTotal }
+          });
+        }
+
+      } catch (e) {
+        console.error('Row Import Error:', e);
+        errors++;
+      }
+    }
+
+    return { success: true, created, updated, errors };
   }
 
   async create(data: any) { return 'Implemented'; }
