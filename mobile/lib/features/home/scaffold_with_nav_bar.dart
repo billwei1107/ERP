@@ -96,12 +96,6 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     // Also listen to 'messagesRead' if we implement it for cross-device sync
   }
 
-  @override
-  void dispose() {
-    _pollingTimer?.cancel();
-    super.dispose();
-  }
-
   Future<void> _fetchUnreadCount() async {
     if (_myId == null) return;
     try {
