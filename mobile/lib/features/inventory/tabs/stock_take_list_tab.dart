@@ -32,9 +32,9 @@ class StockTakeListTab extends ConsumerWidget {
             itemBuilder: (context, index) {
               final st = stockTakes[index];
               final status = st['status'] ?? 'DRAFT';
-              final date = st['createdAt'] != null
+              final date = st['date'] != null
                   ? DateFormat('yyyy/MM/dd')
-                      .format(DateTime.parse(st['createdAt']).toLocal())
+                      .format(DateTime.parse(st['date']).toLocal())
                   : '-';
 
               Color statusColor = Colors.grey;

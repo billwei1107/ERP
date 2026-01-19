@@ -31,9 +31,9 @@ class MovementListTab extends ConsumerWidget {
             itemBuilder: (context, index) {
               final movement = movements[index];
               final isIncoming = movement['type'] == 'IN';
-              final date = movement['createdAt'] != null
+              final date = movement['date'] != null
                   ? DateFormat('MM/dd HH:mm')
-                      .format(DateTime.parse(movement['createdAt']).toLocal())
+                      .format(DateTime.parse(movement['date']).toLocal())
                   : '-';
 
               return ListTile(
@@ -42,7 +42,8 @@ class MovementListTab extends ConsumerWidget {
                   color: isIncoming ? Colors.green : Colors.orange,
                 ),
                 title: Text(movement['productName'] ?? 'Unknown Product'),
-                subtitle: Text('$date  •  ${movement['reason'] ?? ''}'),
+                subtitle: Text(
+                    '$date ${movement['reason'] != null ? " • ${movement['reason']}" : ""}'),
                 trailing: Text(
                   '${isIncoming ? '+' : '-'}${movement['quantity']}',
                   style: TextStyle(
