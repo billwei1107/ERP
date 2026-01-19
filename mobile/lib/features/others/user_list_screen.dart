@@ -37,6 +37,13 @@ class UserListScreen extends ConsumerWidget {
                   icon: const Icon(Icons.delete, color: Colors.grey),
                   onPressed: () => _confirmDelete(context, ref, user),
                 ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => AddUserScreen(user: user)),
+                  ).then((_) => ref.refresh(usersListProvider));
+                },
               );
             },
           );
