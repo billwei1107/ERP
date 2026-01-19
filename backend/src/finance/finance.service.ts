@@ -6,7 +6,11 @@ export class FinanceService implements OnModuleInit {
     constructor(private prisma: PrismaService) { }
 
     async onModuleInit() {
-        await this.seedCategories();
+        try {
+            await this.seedCategories();
+        } catch (e) {
+            console.error('Failed to seed categories:', e);
+        }
     }
 
     private async seedCategories() {
