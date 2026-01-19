@@ -172,3 +172,35 @@ model StockTakeItem {
   
   stockTake   StockTake @relation(fields: [stockTakeId], references: [id], onDelete: Cascade)
 }
+
+// --------------------------------------
+// Finance Management
+// --------------------------------------
+model TransactionCategory {
+  id        Int           @id @default(autoincrement())
+  name      String
+  type      TransactionType // INCOME, EXPENSE
+  isSystem  Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          Int                 @id @default(autoincrement())
+  amount      Decimal
+  type        TransactionType
+  date        DateTime            @default(now())
+  description String?
+  categoryId  Int
+  
+  category    TransactionCategory @relation(fields: [categoryId], references: [id])
+  
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}

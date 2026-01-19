@@ -5,6 +5,8 @@ import 'package:mobile/features/chat/chat_providers.dart';
 import 'package:mobile/features/chat/chat_service.dart';
 import 'package:mobile/features/chat/chat_user_list_screen.dart';
 import 'package:mobile/features/dashboard/dashboard_screen.dart';
+import 'package:mobile/features/inventory/inventory_screen.dart';
+import 'package:mobile/features/finance/finance_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -18,9 +20,6 @@ class _MainScreenState extends ConsumerState<MainScreen>
   int _currentIndex = 0;
   final _storage = const FlutterSecureStorage();
   int? _myId;
-
-  // Pages
-  List<Widget> _pages = [];
 
   @override
   void initState() {
@@ -43,17 +42,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
     final chatService = ref.read(chatServiceProvider);
     final socket = chatService.connect(_myId!);
 
-    // Listen for global messages to update badge
     socket.on('receiveMessage', (data) {
-      // Check if message is for me
       if (data['receiverId'] == _myId) {
-        // Increment badge
-        // In a real app, check if we are currently viewing this chat
         ref.read(unreadCountProvider.notifier).state++;
-
-        // Also refresh the chat list if we are on that tab?
-        // We can use a Stream or just let the user pull to refresh.
-        // Or invalidate provider:
         ref.invalidate(chatUserListProvider);
       }
     });
@@ -69,18 +60,16 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    // Don't disconnect socket here if we want persistence,
-    // but usually MainScreen disposal means App Exit.
-    // chatService.disconnect();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lazy load pages or keep state
     final pages = [
-      const DashboardScreen(), // Make sure DashboardScreen doesn't assume it's the only scaffold
+      const DashboardScreen(),
       const ChatUserListScreen(),
+      const InventoryScreen(),
+      const FinanceScreen(),
     ];
 
     final unreadCount = ref.watch(unreadCountProvider);
@@ -90,29 +79,42 @@ class _MainScreenState extends ConsumerState<MainScreen>
         index: _currentIndex,
         children: pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() => _currentIndex = index);
           if (index == 1 && _myId != null) {
-            // Refresh list when entering chat tab
             ref.refresh(chatUserListProvider(_myId!));
           }
         },
-        items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
+        destinations: [
+          const NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
             label: '儀表板',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Badge(
               isLabelVisible: unreadCount > 0,
               label: Text('$unreadCount'),
-              child: const Icon(Icons.chat),
+              child: const Icon(Icons.chat_bubble_outline),
             ),
-            label: '即時通訊',
+            selectedIcon: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text('$unreadCount'),
+              child: const Icon(Icons.chat_bubble),
+            ),
+            label: '通訊',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.inventory_2_outlined),
+            selectedIcon: Icon(Icons.inventory_2),
+            label: '庫存',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.attach_money_outlined),
+            selectedIcon: Icon(Icons.attach_money),
+            label: '財務',
           ),
         ],
       ),
