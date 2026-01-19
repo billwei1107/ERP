@@ -16,7 +16,7 @@ interface Transaction {
     id: number;
     type: 'INCOME' | 'EXPENSE';
     amount: number;
-    category: string;
+    category: string | { name: string };
     date: string;
     description: string;
 }
@@ -55,12 +55,17 @@ export function FinanceDashboard() {
     }, []);
 
     // Unique categories for filter
-    const uniqueCategories = Array.from(new Set(transactions.map(t => t.category)));
+    const uniqueCategories = Array.from(new Set(transactions.map(t =>
+        typeof t.category === 'object' ? t.category.name : t.category
+    )));
 
     // Filter Logic
     const filteredTransactions = transactions.filter(tx => {
         if (filterType !== 'ALL' && tx.type !== filterType) return false;
-        if (filterCategory !== 'ALL' && tx.category !== filterCategory) return false;
+        if (filterCategory !== 'ALL') {
+            const catName = typeof tx.category === 'object' ? tx.category.name : tx.category;
+            if (catName !== filterCategory) return false;
+        }
         return true;
     });
 
@@ -172,7 +177,9 @@ export function FinanceDashboard() {
                                                 {tx.type === 'INCOME' ? '收入' : '支出'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.category}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {typeof tx.category === 'object' ? tx.category.name : tx.category}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.description}</td>
                                         <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
                                             }`}>
