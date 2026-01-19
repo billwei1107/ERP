@@ -91,6 +91,15 @@ class InventoryService {
     }
   }
 
+  Future<void> updateStockTakeItems(int id, List<dynamic> items) async {
+    try {
+      await _dio
+          .patch('/inventory/stock-takes/$id/items', data: {'items': items});
+    } catch (e) {
+      throw Exception('Failed to update stock take items: $e');
+    }
+  }
+
   // 4. Alerts
   Future<List<dynamic>> getAlerts() async {
     try {

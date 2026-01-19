@@ -69,4 +69,9 @@ export class InventoryController {
   submitStockTake(@Param('id') id: string, @Body() body: { items: any[] }) {
     return this.inventoryService.submitStockTake(+id, body.items);
   }
+
+  @Patch('stock-takes/:id/items')
+  updateStockTakeItems(@Param('id') id: string, @Body() body: { items: any[] }) {
+    return this.inventoryService.updateStockTakeItems(+id, body.items);
+  }
 }

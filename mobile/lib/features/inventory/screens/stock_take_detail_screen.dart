@@ -18,14 +18,62 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
   bool _isLoading = false;
   String? _locationFilter;
 
+  // Controllers map to persist values and avoid ListView mix-up
+  final Map<int, TextEditingController> _controllers = {};
+
   @override
   void initState() {
     super.initState();
-    // Deep Copy items to allow editing without mutating provider state directly
-    // (Though simple List.from with Map.from is shallow copy of maps, we need deeper for items)
+    // Deep Copy items
     _items = (widget.stockTake['items'] as List<dynamic>)
         .map((item) => Map<String, dynamic>.from(item))
         .toList();
+
+    // Initialize controllers
+    for (int i = 0; i < _items.length; i++) {
+      _controllers[i] = TextEditingController(
+          text: (_items[i]['actualStock'] ?? 0).toString());
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _saveDraft() async {
+    setState(() => _isLoading = true);
+    try {
+      final inventoryService = ref.read(inventoryServiceProvider);
+
+      // Update _items from controllers before saving
+      for (int i = 0; i < _items.length; i++) {
+        final val = int.tryParse(_controllers[i]?.text ?? '0') ?? 0;
+        _items[i]['actualStock'] = val;
+        _items[i]['difference'] = val - (_items[i]['systemStock'] ?? 0);
+      }
+
+      await inventoryService.updateStockTakeItems(
+          widget.stockTake['id'], _items);
+
+      if (mounted) {
+        ref.invalidate(stockTakesProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('暫存已儲存'), backgroundColor: Colors.blue),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('儲存失敗: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _submit() async {
@@ -51,6 +99,13 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
 
     try {
       final inventoryService = ref.read(inventoryServiceProvider);
+
+      // Update _items from controllers before submitting
+      for (int i = 0; i < _items.length; i++) {
+        final val = int.tryParse(_controllers[i]?.text ?? '0') ?? 0;
+        _items[i]['actualStock'] = val;
+      }
+
       await inventoryService.submitStockTake(widget.stockTake['id'], _items);
 
       if (mounted) {
@@ -86,15 +141,26 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
         .toList()
       ..sort();
 
-    final filteredItems = _locationFilter == null
-        ? _items
-        : _items.where((i) => i['location'] == _locationFilter).toList();
+    // We need to map filtered items back to original indices to use correct controller
+    final filteredIndices = _items
+        .asMap()
+        .entries
+        .where((entry) =>
+            _locationFilter == null ||
+            entry.value['location'] == _locationFilter)
+        .map((entry) => entry.key)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text('盤點單 #${widget.stockTake['id']}'),
         actions: [
-          if (!isReadOnly)
+          if (!isReadOnly) ...[
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _isLoading ? null : _saveDraft,
+              tooltip: '暫存',
+            ),
             IconButton(
               icon: _isLoading
                   ? const SizedBox(
@@ -106,6 +172,7 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
               onPressed: _isLoading ? null : _submit,
               tooltip: '提交盤點',
             ),
+          ]
         ],
       ),
       body: Column(
@@ -132,13 +199,17 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
 
           Expanded(
             child: ListView.separated(
-              itemCount: filteredItems.length,
+              itemCount: filteredIndices.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final item = filteredItems[index];
+              itemBuilder: (context, idx) {
+                final index = filteredIndices[idx]; // Original index
+                final item = _items[index];
                 final systemStock = item['systemStock'] ?? 0;
-                final actualStock = item['actualStock'] ?? 0;
-                final diff = (actualStock as num) - (systemStock as num);
+
+                // Live calc difference based on controller text
+                final currentText = _controllers[index]?.text ?? '0';
+                final actualStock = int.tryParse(currentText) ?? 0;
+                final diff = actualStock - (systemStock as num);
 
                 return Padding(
                   padding:
@@ -200,7 +271,7 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
                               SizedBox(
                                 height: 40,
                                 child: TextFormField(
-                                  initialValue: actualStock.toString(),
+                                  controller: _controllers[index],
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
                                   decoration: const InputDecoration(
@@ -208,10 +279,8 @@ class _StockTakeDetailScreenState extends ConsumerState<StockTakeDetailScreen> {
                                     contentPadding: EdgeInsets.zero,
                                   ),
                                   onChanged: (val) {
-                                    final numVal = int.tryParse(val) ?? 0;
                                     setState(() {
-                                      item['actualStock'] = numVal;
-                                      item['difference'] = numVal - systemStock;
+                                      // Difference updates via setState triggering build
                                     });
                                   },
                                 ),

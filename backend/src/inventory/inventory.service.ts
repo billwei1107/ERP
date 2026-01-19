@@ -214,6 +214,21 @@ export class InventoryService {
     return stockTake;
   }
 
+  async updateStockTakeItems(id: number, items: StockTakeItem[]) {
+    const stockTake = this.stockTakes.find(st => st.id === id);
+    if (!stockTake) throw new Error('Stock Take not found');
+    if (stockTake.status === 'COMPLETED') throw new Error('Cannot update completed Stock Take');
+
+    // Update items (Save Draft)
+    stockTake.items = items.map(item => ({
+      ...item,
+      difference: item.actualStock - item.systemStock
+    }));
+
+    this.saveData();
+    return stockTake;
+  }
+
   async createMovement(data: Omit<StockMovement, 'id' | 'date'>) {
     const product = this.products.find(p => p.id === data.productId);
     if (!product) throw new Error('Product not found');
