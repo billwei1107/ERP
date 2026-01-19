@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express } from 'express';
+import type { Express } from 'express';
 import { InventoryService } from './inventory.service';
 
 @Controller('inventory')
