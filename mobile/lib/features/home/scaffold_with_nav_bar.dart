@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,12 +29,25 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     _init();
   }
 
+  Timer? _pollingTimer;
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
   void _init() async {
     final idStr = await _storage.read(key: 'userId');
     if (idStr != null) {
       _myId = int.parse(idStr);
       _connectSocket();
       _fetchUnreadCount();
+
+      // Start Polling (Backup for Socket)
+      _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+        _fetchUnreadCount();
+      });
 
       // Also refresh the user list initially to get sorts right
       ref.read(chatUserListProvider(_myId!));
@@ -82,11 +96,24 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     // Also listen to 'messagesRead' if we implement it for cross-device sync
   }
 
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _fetchUnreadCount() async {
     if (_myId == null) return;
-    final chatService = ref.read(chatServiceProvider);
-    final count = await chatService.getUnreadCount(_myId!);
-    ref.read(unreadCountProvider.notifier).state = count;
+    try {
+      final chatService = ref.read(chatServiceProvider);
+      final count = await chatService.getUnreadCount(_myId!);
+      if (mounted) {
+        ref.read(unreadCountProvider.notifier).state = count;
+      }
+    } catch (e) {
+      // Create debug print only on error to avoid spam
+      // debugPrint('Polling fetch error: $e');
+    }
   }
 
   @override
