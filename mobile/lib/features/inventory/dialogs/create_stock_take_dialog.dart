@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../inventory_service.dart';
-import '../../inventory_providers.dart';
-import '../screens/stock_take_detail_screen.dart';
+import '../inventory_service.dart';
+import '../inventory_providers.dart';
 
 class CreateStockTakeDialog extends ConsumerStatefulWidget {
   const CreateStockTakeDialog({super.key});
@@ -29,7 +28,7 @@ class _CreateStockTakeDialogState extends ConsumerState<CreateStockTakeDialog> {
     try {
       final inventoryService = ref.read(inventoryServiceProvider);
 
-      final payload = {
+      final Map<String, dynamic> payload = {
         'note': _noteController.text,
       };
       if (_selectedLocations.isNotEmpty) {

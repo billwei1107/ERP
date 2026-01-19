@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../inventory_service.dart';
-import '../../inventory_providers.dart';
+import '../inventory_service.dart';
+import '../inventory_providers.dart';
 
 class AddProductDialog extends ConsumerStatefulWidget {
   const AddProductDialog({super.key});
