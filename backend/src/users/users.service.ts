@@ -251,9 +251,19 @@ export class UsersService implements OnModuleInit {
       // Step 1: Create user with no empId (let DB default handle CUID or null)
       const { empId, ...otherData } = createUserDto;
 
+      // Auto-generate email if missing (Mobile app might not send it)
+      let email = otherData.email;
+      if (!email && empId) {
+        email = `${empId}@erp.local`.toLowerCase();
+      } else if (!email) {
+        // Fallback if neither email nor empId (should not happen with current app logic)
+        email = `user_${Date.now()}@erp.local`;
+      }
+
       const newUser = await this.prisma.user.create({
         data: {
           ...otherData,
+          email,
           password: otherData.password || 'user123',
           role: otherData.role || Role.STAFF,
           empId: empId || undefined

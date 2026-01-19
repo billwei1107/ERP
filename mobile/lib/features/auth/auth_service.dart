@@ -61,4 +61,9 @@ class AuthService {
     }
     return null;
   }
+
+  Future<bool> isAdmin() async {
+    final user = await getUser();
+    return user != null && user['role'] == 'ADMIN';
+  }
 }
