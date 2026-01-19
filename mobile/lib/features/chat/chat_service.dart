@@ -73,7 +73,13 @@ class ChatService {
 
   // 3. Connect Socket.IO
   IO.Socket connect(int userId) {
-    if (_socket != null && _socket!.connected) return _socket!;
+    // If socket exists, reuse it (even if connecting)
+    if (_socket != null) {
+      if (!_socket!.connected) {
+        _socket!.connect();
+      }
+      return _socket!;
+    }
 
     _socket = IO.io(
       'http://54.255.186.244:8080/chat', // Nginx Port + Namespace
@@ -88,7 +94,7 @@ class ChatService {
     _socket!.connect();
 
     _socket!.onConnect((_) {
-      // debugPrint('Socket Connected');
+      debugPrint('Socket Connected');
     });
 
     _socket!.onDisconnect((_) => debugPrint('Socket Disconnected'));
