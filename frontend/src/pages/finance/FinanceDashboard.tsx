@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { request } from '../../lib/api';
+import { request, API_BASE_URL } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { TransactionModal } from '../../components/finance/TransactionModal';
 import {
@@ -68,6 +68,36 @@ export function FinanceDashboard() {
         }
         return true;
     });
+
+    // Import / Export
+    const handleExport = () => {
+        window.open(`${API_BASE_URL}/finance/export?format=xlsx`, '_blank');
+    };
+
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/finance/import`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (res.ok) {
+                alert('匯入成功');
+                fetchData();
+            } else {
+                alert('匯入失敗');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('匯入發生錯誤');
+        }
+        e.target.value = '';
+    };
 
     return (
         <div className="p-6 space-y-6">
@@ -147,7 +177,21 @@ export function FinanceDashboard() {
                             ))}
                         </select>
 
+
                         {/* Add Button moved here */}
+                        <div className="border-l pl-2 ml-2 flex gap-2">
+                            <Button variant="outline" onClick={handleExport}>匯出收支</Button>
+                            <div className="relative">
+                                <input
+                                    type="file"
+                                    accept=".xlsx,.csv"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    onChange={handleImport}
+                                />
+                                <Button variant="outline">匯入</Button>
+                            </div>
+                        </div>
+
                         <Button onClick={() => setIsModalOpen(true)} className="ml-2">
                             + 記帳
                         </Button>

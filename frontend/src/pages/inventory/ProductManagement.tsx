@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { request } from '../../lib/api';
+import { request, API_BASE_URL } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 
@@ -99,6 +99,37 @@ export function ProductManagement() {
         }
     };
 
+    const handleExport = () => {
+        window.open(`${API_BASE_URL}/inventory/export?format=xlsx`, '_blank');
+    };
+
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/inventory/import`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (res.ok) {
+                alert('匯入成功');
+                loadProducts();
+                loadSummary();
+            } else {
+                alert('匯入失敗');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('匯入發生錯誤');
+        }
+        // Reset input
+        e.target.value = '';
+    };
+
     // Derived lists for dropdowns
     const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean);
     const locations = Array.from(new Set(products.flatMap(p => p.locations.map(l => l.location)))).filter(Boolean);
@@ -160,6 +191,18 @@ export function ProductManagement() {
                         {locations.map(l => <option key={l} value={l}>{l}</option>)}
                     </select>
                     <Button onClick={handleCreate}>+ 新增商品</Button>
+                    <div className="border-l pl-2 ml-2 flex gap-2">
+                        <Button variant="outline" onClick={handleExport}>匯出 Excel</Button>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".xlsx,.csv"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                onChange={handleImport}
+                            />
+                            <Button variant="outline">匯入商品</Button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
