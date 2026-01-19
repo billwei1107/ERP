@@ -40,6 +40,14 @@ class InventoryService {
     }
   }
 
+  Future<void> createMovement(Map<String, dynamic> data) async {
+    try {
+      await _dio.post('/inventory/movements', data: data);
+    } catch (e) {
+      throw Exception('Failed to create movement: $e');
+    }
+  }
+
   // 3. Stock Takes
   Future<List<dynamic>> getStockTakes() async {
     try {
@@ -47,6 +55,23 @@ class InventoryService {
       return response.data as List<dynamic>;
     } catch (e) {
       throw Exception('Failed to load stock takes: $e');
+    }
+  }
+
+  Future<void> createStockTake(Map<String, dynamic> data) async {
+    try {
+      await _dio.post('/inventory/stock-takes', data: data);
+    } catch (e) {
+      throw Exception('Failed to create stock take: $e');
+    }
+  }
+
+  Future<void> submitStockTake(int id, List<dynamic> items) async {
+    try {
+      await _dio
+          .post('/inventory/stock-takes/$id/submit', data: {'items': items});
+    } catch (e) {
+      throw Exception('Failed to submit stock take: $e');
     }
   }
 
