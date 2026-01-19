@@ -4,7 +4,9 @@ import '../inventory_service.dart';
 import '../inventory_providers.dart';
 
 class AddProductDialog extends ConsumerStatefulWidget {
-  const AddProductDialog({super.key});
+  final Map<String, dynamic>? product; // If provided, we are editing
+
+  const AddProductDialog({super.key, this.product});
 
   @override
   ConsumerState<AddProductDialog> createState() => _AddProductDialogState();
@@ -18,11 +20,24 @@ class _AddProductDialogState extends ConsumerState<AddProductDialog> {
   final _unitController = TextEditingController(text: '個');
   final _safetyStockController = TextEditingController(text: '10');
 
-  // Simplified initial location (Optional)
+  // Simplified initial location (Only for create)
   final _locationController = TextEditingController();
   final _initialQuantityController = TextEditingController(text: '0');
 
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product != null) {
+      final p = widget.product!;
+      _skuController.text = p['sku'] ?? '';
+      _nameController.text = p['name'] ?? '';
+      _categoryController.text = p['category'] ?? '';
+      _unitController.text = p['unit'] ?? '個';
+      _safetyStockController.text = (p['safetyStock'] ?? 10).toString();
+    }
+  }
 
   @override
   void dispose() {
@@ -44,38 +59,52 @@ class _AddProductDialogState extends ConsumerState<AddProductDialog> {
     try {
       final inventoryService = ref.read(inventoryServiceProvider);
 
-      final locations = <Map<String, dynamic>>[];
-      if (_locationController.text.isNotEmpty) {
-        locations.add({
-          'location': _locationController.text.trim(),
-          'quantity': int.tryParse(_initialQuantityController.text) ?? 0,
-        });
-      }
-
-      await inventoryService.createProduct({
+      final data = {
         'sku': _skuController.text.trim(),
         'name': _nameController.text.trim(),
         'category': _categoryController.text.trim(),
         'unit': _unitController.text.trim(),
         'safetyStock': int.tryParse(_safetyStockController.text) ?? 0,
-        'totalStock':
-            0, // Backend logic will calculate from locations or default to 0
-        'locations': locations,
-      });
+      };
+
+      if (widget.product != null) {
+        // Edit Mode
+        await inventoryService.updateProduct(widget.product!['id'], data);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('更新商品成功'), backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        // Create Mode
+        final locations = <Map<String, dynamic>>[];
+        if (_locationController.text.isNotEmpty) {
+          locations.add({
+            'location': _locationController.text.trim(),
+            'quantity': int.tryParse(_initialQuantityController.text) ?? 0,
+          });
+        }
+        data['totalStock'] = 0; // Backend handles this
+        data['locations'] = locations; // Only passed on creation
+
+        await inventoryService.createProduct(data);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('新增商品成功'), backgroundColor: Colors.green),
+          );
+        }
+      }
 
       if (mounted) {
-        // Refresh product list
         ref.invalidate(productsProvider);
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('新增商品成功'), backgroundColor: Colors.green),
-        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('新增失敗: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('操作失敗: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -85,8 +114,10 @@ class _AddProductDialogState extends ConsumerState<AddProductDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.product != null;
+
     return AlertDialog(
-      title: const Text('新增商品'),
+      title: Text(isEditing ? '編輯商品' : '新增商品'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -123,25 +154,28 @@ class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                   )),
                 ],
               ),
-              const SizedBox(height: 16),
-              const Text('初始庫存儲位 (選填)',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Row(
-                children: [
-                  Expanded(
-                      child: TextFormField(
-                    controller: _locationController,
-                    decoration: const InputDecoration(labelText: '儲位 (如 A-01)'),
-                  )),
-                  const SizedBox(width: 16),
-                  Expanded(
-                      child: TextFormField(
-                    controller: _initialQuantityController,
-                    decoration: const InputDecoration(labelText: '數量'),
-                    keyboardType: TextInputType.number,
-                  )),
-                ],
-              ),
+              if (!isEditing) ...[
+                const SizedBox(height: 16),
+                const Text('初始庫存儲位 (選填)',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Row(
+                  children: [
+                    Expanded(
+                        child: TextFormField(
+                      controller: _locationController,
+                      decoration:
+                          const InputDecoration(labelText: '儲位 (如 A-01)'),
+                    )),
+                    const SizedBox(width: 16),
+                    Expanded(
+                        child: TextFormField(
+                      controller: _initialQuantityController,
+                      decoration: const InputDecoration(labelText: '數量'),
+                      keyboardType: TextInputType.number,
+                    )),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -158,7 +192,7 @@ class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('建立'),
+              : Text(isEditing ? '更新' : '建立'),
         ),
       ],
     );

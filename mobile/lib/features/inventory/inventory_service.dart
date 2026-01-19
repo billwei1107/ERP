@@ -30,6 +30,22 @@ class InventoryService {
     }
   }
 
+  Future<void> updateProduct(int id, Map<String, dynamic> data) async {
+    try {
+      await _dio.patch('/inventory/products/$id', data: data);
+    } catch (e) {
+      throw Exception('Failed to update product: $e');
+    }
+  }
+
+  Future<void> deleteProduct(int id) async {
+    try {
+      await _dio.delete('/inventory/products/$id');
+    } catch (e) {
+      throw Exception('Failed to delete product: $e');
+    }
+  }
+
   // 2. Movements
   Future<List<dynamic>> getMovements() async {
     try {
