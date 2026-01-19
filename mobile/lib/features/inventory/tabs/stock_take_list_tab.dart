@@ -33,7 +33,7 @@ class StockTakeListTab extends ConsumerWidget {
               final st = stockTakes[index];
               final status = st['status'] ?? 'DRAFT';
               final date = st['date'] != null
-                  ? DateFormat('yyyy/MM/dd')
+                  ? DateFormat('yyyy/MM/dd HH:mm')
                       .format(DateTime.parse(st['date']).toLocal())
                   : '-';
 
