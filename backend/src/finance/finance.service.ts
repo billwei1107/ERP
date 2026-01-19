@@ -55,14 +55,29 @@ export class FinanceService implements OnModuleInit {
     }
 
     async createTransaction(data: any) {
-        // data matches Transaction but we need to ensure types
+        let categoryId = Number(data.categoryId);
+
+        // Support Legacy Web Payload (sending name as 'category')
+        if (isNaN(categoryId) && data.category) {
+            const cat = await this.prisma.transactionCategory.findFirst({
+                where: { name: data.category }
+            });
+            if (cat) {
+                categoryId = cat.id;
+            }
+        }
+
+        if (isNaN(categoryId)) {
+            throw new Error('Invalid Category');
+        }
+
         return this.prisma.transaction.create({
             data: {
                 amount: data.amount, // Decimal handled by Prisma
                 type: data.type,
-                date: data.date ? new Date(data.date) : new Date(), // Ensure date object
+                date: data.date ? new Date(data.date) : new Date(),
                 description: data.description,
-                categoryId: Number(data.categoryId),
+                categoryId: categoryId,
             },
             include: { category: true }
         });
