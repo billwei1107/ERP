@@ -28,7 +28,7 @@ class FinanceService {
   }
 
   Future<List<dynamic>> getMonthlyStats() async {
-    final response = await _dio.get('/finance/stats/monthly');
+    final response = await _dio.get('/finance/stats');
     return response.data as List<dynamic>;
   }
 
