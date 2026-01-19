@@ -141,20 +141,46 @@ export class FinanceService implements OnModuleInit {
     }
 
     // Import / Export
+    async downloadTemplate() {
+        const data = [
+            {
+                Date: '2024-01-01 14:30',
+                Type: 'EXPENSE',
+                Category: '雜項支出',
+                Amount: 100,
+                Description: '範例支出'
+            }
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+
+        return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    }
+
     async exportTransactions(format: 'xlsx' | 'csv' = 'xlsx') {
         const transactions = await this.prisma.transaction.findMany({
             include: { category: true },
             orderBy: { date: 'desc' }
         });
 
-        const data = transactions.map(t => ({
-            ID: t.id,
-            Date: t.date.toISOString().split('T')[0],
-            Type: t.type,
-            Category: t.category.name,
-            Amount: Number(t.amount),
-            Description: t.description || ''
-        }));
+        const data = transactions.map(t => {
+            const d = new Date(t.date);
+            // Format: YYYY-MM-DD HH:mm
+            const dateStr = d.toISOString().split('T')[0] + ' ' +
+                String(d.getHours()).padStart(2, '0') + ':' +
+                String(d.getMinutes()).padStart(2, '0');
+
+            return {
+                ID: t.id,
+                Date: dateStr,
+                Type: t.type,
+                Category: t.category.name,
+                Amount: Number(t.amount),
+                Description: t.description || ''
+            };
+        });
 
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
