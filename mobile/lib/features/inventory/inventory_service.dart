@@ -124,6 +124,18 @@ class InventoryService {
     }
   }
 
+  Future<List<int>> downloadTemplate() async {
+    try {
+      final response = await _dio.get(
+        '/inventory/template',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to download template: $e');
+    }
+  }
+
   Future<void> importInventory(File file) async {
     try {
       String fileName = file.path.split('/').last;

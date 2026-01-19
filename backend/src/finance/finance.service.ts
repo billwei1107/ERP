@@ -167,6 +167,24 @@ export class FinanceService implements OnModuleInit {
         }
     }
 
+    async downloadTemplate() {
+        const data = [
+            {
+                Date: '2024-01-01',
+                Type: 'EXPENSE',
+                Category: '雜項支出',
+                Amount: 100,
+                Description: '範例支出'
+            }
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+
+        return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    }
+
     async importTransactions(fileBuffer: Buffer) {
         const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];

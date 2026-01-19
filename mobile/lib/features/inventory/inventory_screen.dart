@@ -41,6 +41,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
             itemBuilder: (context) => [
               const PopupMenuItem(
                   value: 'export_xlsx', child: Text('匯出 Excel')),
+              const PopupMenuItem(
+                  value: 'download_template', child: Text('下載範本')),
               const PopupMenuItem(value: 'import', child: Text('匯入商品')),
             ],
           ),
@@ -76,6 +78,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
         await fileService.saveAndShareFile(
             'inventory_export_${DateTime.now().millisecondsSinceEpoch}.xlsx',
             bytes);
+      } else if (value == 'download_template') {
+        final bytes = await inventoryService.downloadTemplate();
+        await fileService.saveAndShareFile('inventory_template.xlsx', bytes);
       } else if (value == 'import') {
         final file = await fileService.pickFile();
         if (file != null) {

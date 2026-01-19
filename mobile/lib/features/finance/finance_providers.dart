@@ -53,6 +53,18 @@ class FinanceService {
     }
   }
 
+  Future<List<int>> downloadTemplate() async {
+    try {
+      final response = await _dio.get(
+        '/finance/template',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to download template: $e');
+    }
+  }
+
   Future<void> importTransactions(File file) async {
     try {
       String fileName = file.path.split('/').last;

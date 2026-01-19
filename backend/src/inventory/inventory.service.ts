@@ -383,6 +383,25 @@ export class InventoryService {
     }
   }
 
+  async downloadTemplate() {
+    const data = [
+      {
+        SKU: 'DEMO-001',
+        Name: '範例商品',
+        Category: '一般',
+        Unit: '個',
+        SafetyStock: 10,
+        Locations: 'A-01:10; B-02:5'
+      }
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+
+    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+  }
+
   async importInventory(fileBuffer: Buffer) {
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];

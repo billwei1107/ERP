@@ -181,6 +181,7 @@ export function FinanceDashboard() {
                         {/* Add Button moved here */}
                         <div className="border-l pl-2 ml-2 flex gap-2">
                             <Button variant="outline" onClick={handleExport}>匯出收支</Button>
+                            <Button variant="outline" onClick={() => window.open(`${API_BASE_URL}/finance/template`, '_blank')}>下載範本</Button>
                             <div className="relative">
                                 <input
                                     type="file"

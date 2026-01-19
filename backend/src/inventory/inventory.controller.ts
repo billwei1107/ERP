@@ -89,6 +89,17 @@ export class InventoryController {
     res.end(buffer);
   }
 
+  @Get('template')
+  async downloadTemplate(@Res() res: Response) {
+    const buffer = await this.inventoryService.downloadTemplate();
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="inventory_template.xlsx"',
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
   async import(@UploadedFile() file: Express.Multer.File) {

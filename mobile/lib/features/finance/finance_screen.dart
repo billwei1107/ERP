@@ -22,6 +22,8 @@ class FinanceScreen extends ConsumerWidget {
               itemBuilder: (context) => [
                 const PopupMenuItem(
                     value: 'export_xlsx', child: Text('匯出 Excel')),
+                const PopupMenuItem(
+                    value: 'download_template', child: Text('下載範本')),
                 const PopupMenuItem(value: 'import', child: Text('匯入收支')),
               ],
             ),
@@ -61,6 +63,9 @@ class FinanceScreen extends ConsumerWidget {
         await fileService.saveAndShareFile(
             'finance_export_${DateTime.now().millisecondsSinceEpoch}.xlsx',
             bytes);
+      } else if (value == 'download_template') {
+        final bytes = await financeService.downloadTemplate();
+        await fileService.saveAndShareFile('finance_template.xlsx', bytes);
       } else if (value == 'import') {
         final file = await fileService.pickFile();
         if (file != null) {

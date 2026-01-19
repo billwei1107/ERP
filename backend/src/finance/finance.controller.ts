@@ -49,6 +49,17 @@ export class FinanceController {
         res.end(buffer);
     }
 
+    @Get('template')
+    async downloadTemplate(@Res() res: Response) {
+        const buffer = await this.financeService.downloadTemplate();
+        res.set({
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition': 'attachment; filename="finance_template.xlsx"',
+            'Content-Length': buffer.length,
+        });
+        res.end(buffer);
+    }
+
     @Post('import')
     @UseInterceptors(FileInterceptor('file'))
     async import(@UploadedFile() file: Express.Multer.File) {
