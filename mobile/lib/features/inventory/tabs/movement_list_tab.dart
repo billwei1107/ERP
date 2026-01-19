@@ -37,11 +37,13 @@ class MovementListTab extends ConsumerWidget {
                   : '-';
 
               return ListTile(
-                color: isIncoming ? Colors.green : Colors.orange,
-              ),
-              title: Text(movement['productName'] ?? 'Unknown Product'),
-              subtitle: Text('$date  •  ${movement['reason'] ?? ''}'),
-              trailing: Text(
+                leading: Icon(
+                  isIncoming ? Icons.arrow_circle_down : Icons.arrow_circle_up,
+                  color: isIncoming ? Colors.green : Colors.orange,
+                ),
+                title: Text(movement['productName'] ?? 'Unknown Product'),
+                subtitle: Text('$date  •  ${movement['reason'] ?? ''}'),
+                trailing: Text(
                   '${isIncoming ? '+' : '-'}${movement['quantity']}',
                   style: TextStyle(
                     color: isIncoming ? Colors.green : Colors.orange,
