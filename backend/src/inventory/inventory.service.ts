@@ -337,10 +337,7 @@ export class InventoryService {
   }
 
   async getAlerts() {
-    return this.prisma.product.findMany({
-      where: {
-        totalStock: { lt: this.prisma.product.fields.safetyStock }
-      },
+    const products = await this.prisma.product.findMany({
       select: {
         id: true,
         name: true,
@@ -348,6 +345,8 @@ export class InventoryService {
         safetyStock: true
       }
     });
+
+    return products.filter(p => p.totalStock < p.safetyStock);
   }
 
 

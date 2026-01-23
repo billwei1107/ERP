@@ -68,7 +68,7 @@ class FinanceListTab extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(context);
               await ref.read(financeServiceProvider).deleteTransaction(id);
-              ref.refresh(transactionsProvider);
+              ref.invalidate(transactionsProvider);
               ref.invalidate(financeSummaryProvider);
             },
             child: const Text('刪除', style: TextStyle(color: Colors.red)),

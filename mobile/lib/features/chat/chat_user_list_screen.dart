@@ -49,52 +49,56 @@ class _ChatUserListScreenState extends ConsumerState<ChatUserListScreen> {
           if (users.isEmpty) {
             return const Center(child: Text('沒有其他用戶'));
           }
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final user = users[index];
-              final unread = user['unreadCount'] ?? 0;
+          return RefreshIndicator(
+            onRefresh: () =>
+                ref.refresh(chatUserListProvider(_currentUserId!).future),
+            child: ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final user = users[index];
+                final unread = user['unreadCount'] ?? 0;
 
-              return ListTile(
-                leading: CircleAvatar(
-                  child: Text(user['name']?[0] ?? '?'),
-                ),
-                title: Text(user['name'] ?? 'Unknown'),
-                subtitle: Text(user['email'] ?? ''),
-                trailing: unread > 0
-                    ? Badge(
-                        label: Text('$unread'),
-                        child: const Icon(Icons.message,
-                            color: Colors.transparent), // invisible anchor
-                      )
-                    : null,
-                onTap: () async {
-                  // Mark as read immediately purely for UI snappy feel (optional)
-                  // Navigate
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChatScreen(
-                        myId: _currentUserId!,
-                        otherUser: user,
+                return ListTile(
+                  leading: CircleAvatar(
+                    child: Text(user['name']?[0] ?? '?'),
+                  ),
+                  title: Text(user['name'] ?? 'Unknown'),
+                  subtitle: Text(user['email'] ?? ''),
+                  trailing: unread > 0
+                      ? Badge(
+                          label: Text('$unread'),
+                          child: const Icon(Icons.message,
+                              color: Colors.transparent), // invisible anchor
+                        )
+                      : null,
+                  onTap: () async {
+                    // Mark as read immediately purely for UI snappy feel (optional)
+                    // Navigate
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                          myId: _currentUserId!,
+                          otherUser: user,
+                        ),
                       ),
-                    ),
-                  );
-                  // Refresh list when coming back
-                  ref.invalidate(chatUserListProvider(_currentUserId!));
+                    );
+                    // Refresh list when coming back
+                    ref.invalidate(chatUserListProvider(_currentUserId!));
 
-                  // Refresh global badge by fetching real count
-                  ref
-                      .read(chatServiceProvider)
-                      .getUnreadCount(_currentUserId!)
-                      .then((count) {
-                    if (context.mounted) {
-                      ref.read(unreadCountProvider.notifier).state = count;
-                    }
-                  });
-                },
-              );
-            },
+                    // Refresh global badge by fetching real count
+                    ref
+                        .read(chatServiceProvider)
+                        .getUnreadCount(_currentUserId!)
+                        .then((count) {
+                      if (context.mounted) {
+                        ref.read(unreadCountProvider.notifier).state = count;
+                      }
+                    });
+                  },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

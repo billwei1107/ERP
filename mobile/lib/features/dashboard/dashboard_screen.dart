@@ -8,6 +8,7 @@ import 'package:mobile/features/todo/todo_screen.dart';
 import 'package:mobile/features/todo/add_todo_dialog.dart';
 import 'package:mobile/features/chat/chat_user_list_screen.dart';
 import 'package:mobile/features/chat/chat_providers.dart';
+import 'package:mobile/features/inventory/inventory_providers.dart'; // Added import
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -209,18 +210,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     // Show LATEST Clock In time if available
     final clockInTime = _attendanceStatus?['clockIn'] != null
-        ? DateTime.parse(_attendanceStatus!['clockIn'])
-            .toLocal()
-            .toString()
-            .substring(11, 16)
+        ? DateFormat('HH:mm')
+            .format(DateTime.parse(_attendanceStatus!['clockIn']).toLocal())
         : '--:--';
 
     // Show LATEST Clock Out time if available
     final clockOutTime = _attendanceStatus?['clockOut'] != null
-        ? DateTime.parse(_attendanceStatus!['clockOut'])
-            .toLocal()
-            .toString()
-            .substring(11, 16)
+        ? DateFormat('HH:mm')
+            .format(DateTime.parse(_attendanceStatus!['clockOut']).toLocal())
         : '--:--';
 
     return Scaffold(
@@ -228,203 +225,213 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         title: const Text('儀表板'),
         automaticallyImplyLeading: false, // Hide back button
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Welcome / Date
-            Text(
-              '${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '早安，${_userName ?? 'User'}',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 24),
-
-            // 2. Attendance Card
-            const Text(
-              '打卡',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            const Text('上班打卡',
-                                style: TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            Text(clockInTime,
-                                style: Theme.of(context).textTheme.titleLarge),
-                          ],
-                        ),
-                        Container(
-                            width: 1, height: 40, color: Colors.grey[300]),
-                        Column(
-                          children: [
-                            const Text('下班打卡',
-                                style: TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            Text(clockOutTime,
-                                style: Theme.of(context).textTheme.titleLarge),
-                          ],
-                        ),
-                      ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _loadInitialData(); // Reloads user, attendance, todos
+          ref.invalidate(inventoryAlertsProvider); // Reloads alerts
+        },
+        child: SingleChildScrollView(
+          physics:
+              const AlwaysScrollableScrollPhysics(), // Ensure scroll even if content fits
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Welcome / Date
+              Text(
+                '${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
                     ),
-                    const SizedBox(height: 16),
-                    _isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : Row(
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '早安，${_userName ?? 'User'}',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 24),
+
+              // 2. Attendance Card
+              const Text(
+                '打卡',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
                             children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  // Enable Clock In if NO record OR Last was CLOCK_OUT
-                                  onPressed: (_attendanceStatus == null ||
-                                          _attendanceStatus![
-                                                  'lastRecordType'] ==
-                                              'CLOCK_OUT' ||
-                                          _attendanceStatus![
-                                                  'lastRecordType'] ==
-                                              null)
-                                      ? _handleClockIn
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                  ),
-                                  child: const Text('上班'),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: ElevatedButton(
-                                  // Enable Clock Out if Last was CLOCK_IN
-                                  onPressed: (_attendanceStatus != null &&
-                                          _attendanceStatus![
-                                                  'lastRecordType'] ==
-                                              'CLOCK_IN')
-                                      ? _handleClockOut
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                  ),
-                                  child: const Text('下班'),
-                                ),
-                              ),
+                              const Text('上班打卡',
+                                  style: TextStyle(color: Colors.grey)),
+                              const SizedBox(height: 4),
+                              Text(clockInTime,
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
                             ],
                           ),
-                  ],
+                          Container(
+                              width: 1, height: 40, color: Colors.grey[300]),
+                          Column(
+                            children: [
+                              const Text('下班打卡',
+                                  style: TextStyle(color: Colors.grey)),
+                              const SizedBox(height: 4),
+                              Text(clockOutTime,
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    // Enable Clock In if NO record OR Last was CLOCK_OUT
+                                    onPressed: (_attendanceStatus == null ||
+                                            _attendanceStatus![
+                                                    'lastRecordType'] ==
+                                                'CLOCK_OUT' ||
+                                            _attendanceStatus![
+                                                    'lastRecordType'] ==
+                                                null)
+                                        ? _handleClockIn
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                    child: const Text('上班'),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    // Enable Clock Out if Last was CLOCK_IN
+                                    onPressed: (_attendanceStatus != null &&
+                                            _attendanceStatus![
+                                                    'lastRecordType'] ==
+                                                'CLOCK_IN')
+                                        ? _handleClockOut
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                    child: const Text('下班'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // 2.5 Unread Message Alert
-            Consumer(
-              builder: (context, ref, child) {
-                final unreadCount = ref.watch(unreadCountProvider);
-                if (unreadCount == 0) return const SizedBox.shrink();
+              // 2.5 Unread Message Alert
+              Consumer(
+                builder: (context, ref, child) {
+                  final unreadCount = ref.watch(unreadCountProvider);
+                  if (unreadCount == 0) return const SizedBox.shrink();
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: Card(
-                    color: Colors.blue[50],
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.blue[100]!)),
-                    child: ListTile(
-                      leading: const Icon(Icons.mark_chat_unread,
-                          color: Colors.blue),
-                      title: Text('$unreadCount 則未讀訊息'),
-                      subtitle: const Text('點擊前往即時通訊查看'),
-                      trailing: const Icon(Icons.arrow_forward, size: 16),
-                      onTap: () {
-                        // Switch to Chat Tab (index 1)
-                        // We can't access Shell here easily, but we can navigate to UserList?
-                        // Actually router handles it?
-                        // Or use Shell navigation.
-                        // For now, simple navigation works or better: interact with BottomBar.
-                        // But since we use GoRouter Shell, changing index is hard without context access.
-                        // Let's just push ChatUserListScreen temporary or find a way.
-                        // Pushing screen is fine.
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (c) => const ChatUserListScreen()));
-                      },
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Card(
+                      color: Colors.blue[50],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.blue[100]!)),
+                      child: ListTile(
+                        leading: const Icon(Icons.mark_chat_unread,
+                            color: Colors.blue),
+                        title: Text('$unreadCount 則未讀訊息'),
+                        subtitle: const Text('點擊前往即時通訊查看'),
+                        trailing: const Icon(Icons.arrow_forward, size: 16),
+                        onTap: () {
+                          // Switch to Chat Tab (index 1)
+                          // We can't access Shell here easily, but we can navigate to UserList?
+                          // Actually router handles it?
+                          // Or use Shell navigation.
+                          // For now, simple navigation works or better: interact with BottomBar.
+                          // But since we use GoRouter Shell, changing index is hard without context access.
+                          // Let's just push ChatUserListScreen temporary or find a way.
+                          // Pushing screen is fine.
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (c) => const ChatUserListScreen()));
+                        },
+                      ),
                     ),
+                  );
+                },
+              ),
+
+              // 3. Todo Preview
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        '待辦事項',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.blue),
+                        onPressed: _showQuickAddDialog,
+                        tooltip: '快速新增',
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const TodoScreen()),
+                        ).then((_) {
+                          // Refresh when returning from TodoScreen
+                          _loadInitialData();
+                        });
+                      },
+                      child: const Text('查看全部')),
+                ],
+              ),
+              _buildTodoPreview(),
 
-            // 3. Todo Preview
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      '待辦事項',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle, color: Colors.blue),
-                      onPressed: _showQuickAddDialog,
-                      tooltip: '快速新增',
-                    ),
-                  ],
-                ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const TodoScreen()),
-                      ).then((_) {
-                        // Refresh when returning from TodoScreen
-                        _loadInitialData();
-                      });
-                    },
-                    child: const Text('查看全部')),
-              ],
-            ),
-            _buildTodoPreview(),
+              const SizedBox(height: 24),
 
-            const SizedBox(height: 24),
-
-            // 4. Inventory Alerts
-            const Text(
-              '庫存警示',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            _buildInventoryAlerts(),
-          ],
+              // 4. Inventory Alerts
+              const Text(
+                '庫存警示',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _buildInventoryAlerts(),
+            ],
+          ),
         ),
       ),
     );
@@ -506,22 +513,61 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildInventoryAlerts() {
-    return Card(
-      color: Colors.red[50],
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.red[100]!),
-      ),
-      child: ListTile(
-        leading: const Icon(Icons.warning_amber_rounded, color: Colors.red),
-        title: const Text('3 項商品庫存過低'),
-        subtitle: const Text('iPhone 15 Pro, MacBook Air...'),
-        trailing: const Icon(Icons.arrow_forward, size: 16),
-        onTap: () {
-          // Navigate to inventory tab
-        },
-      ),
+    return Consumer(
+      builder: (context, ref, child) {
+        final alertsAsync = ref.watch(inventoryAlertsProvider);
+
+        return alertsAsync.when(
+          data: (alerts) {
+            if (alerts.isEmpty) {
+              return Card(
+                color: Colors.green[50],
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.green[100]!),
+                ),
+                child: const ListTile(
+                  leading:
+                      Icon(Icons.check_circle_outline, color: Colors.green),
+                  title: Text('庫存狀況良好'),
+                  subtitle: Text('所有商品庫存皆在安全水位之上'),
+                ),
+              );
+            }
+
+            final count = alerts.length;
+            final names = alerts.take(2).map((a) => a['name']).join(', ');
+            final subtitle = count > 2 ? '$names...' : names;
+
+            return Card(
+              color: Colors.red[50],
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.red[100]!),
+              ),
+              child: ListTile(
+                leading:
+                    const Icon(Icons.warning_amber_rounded, color: Colors.red),
+                title: Text('$count 項商品庫存過低'),
+                subtitle: Text(subtitle),
+                trailing: const Icon(Icons.arrow_forward, size: 16),
+                onTap: () {
+                  // Navigate to inventory tab (index 2)
+                  // Use NavigationShell logic if possible, but here we might just notify user
+                  // or switch tab via GoRouter if we had access.
+                  // For now, allow simple navigation or just visual alert.
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('請前往庫存頁面查看詳情')));
+                },
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, s) => Text('無法載入庫存警示: $e'),
+        );
+      },
     );
   }
 }

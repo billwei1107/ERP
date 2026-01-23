@@ -142,46 +142,49 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _todos.isEmpty
               ? const Center(child: Text('目前沒有待辦事項'))
-              : ListView.builder(
-                  itemCount: _todos.length,
-                  padding: const EdgeInsets.all(16),
-                  itemBuilder: (context, index) {
-                    final todo = _todos[index];
-                    return Dismissible(
-                      key: Key(todo.id.toString()),
-                      background: Container(color: Colors.red),
-                      onDismissed: (_) => _deleteTodo(todo.id),
-                      child: Card(
-                        child: ListTile(
-                          leading: Checkbox(
-                            value: todo.isCompleted,
-                            onChanged: (_) => _toggleTodo(todo),
-                          ),
-                          title: Text(
-                            todo.title,
-                            style: TextStyle(
-                              decoration: todo.isCompleted
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              color: todo.isCompleted ? Colors.grey : null,
+              : RefreshIndicator(
+                  onRefresh: _loadTodos,
+                  child: ListView.builder(
+                    itemCount: _todos.length,
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final todo = _todos[index];
+                      return Dismissible(
+                        key: Key(todo.id.toString()),
+                        background: Container(color: Colors.red),
+                        onDismissed: (_) => _deleteTodo(todo.id),
+                        child: Card(
+                          child: ListTile(
+                            leading: Checkbox(
+                              value: todo.isCompleted,
+                              onChanged: (_) => _toggleTodo(todo),
                             ),
+                            title: Text(
+                              todo.title,
+                              style: TextStyle(
+                                decoration: todo.isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: todo.isCompleted ? Colors.grey : null,
+                              ),
+                            ),
+                            subtitle: todo.dueAt != null
+                                ? Text(
+                                    '截止: ${DateFormat('yyyy-MM-dd HH:mm').format(todo.dueAt!.toLocal())}',
+                                    style: TextStyle(
+                                      color: todo.dueAt!
+                                                  .isBefore(DateTime.now()) &&
+                                              !todo.isCompleted
+                                          ? Colors.red
+                                          : Colors.grey,
+                                    ),
+                                  )
+                                : null,
                           ),
-                          subtitle: todo.dueAt != null
-                              ? Text(
-                                  '截止: ${DateFormat('yyyy-MM-dd HH:mm').format(todo.dueAt!.toLocal())}',
-                                  style: TextStyle(
-                                    color:
-                                        todo.dueAt!.isBefore(DateTime.now()) &&
-                                                !todo.isCompleted
-                                            ? Colors.red
-                                            : Colors.grey,
-                                  ),
-                                )
-                              : null,
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTodoDialog,

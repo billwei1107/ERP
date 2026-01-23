@@ -85,7 +85,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
         final file = await fileService.pickFile();
         if (file != null) {
           await inventoryService.importInventory(file);
-          ref.refresh(productsProvider); // Refresh list
+          ref.invalidate(productsProvider); // Refresh list
           if (mounted) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('匯入成功')));

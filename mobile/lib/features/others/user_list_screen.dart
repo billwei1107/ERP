@@ -16,36 +16,39 @@ class UserListScreen extends ConsumerWidget {
         data: (users) {
           if (users.isEmpty) return const Center(child: Text('無使用者資料'));
 
-          return ListView.separated(
-            itemCount: users.length,
-            separatorBuilder: (_, __) => const Divider(),
-            itemBuilder: (context, index) {
-              final user = users[index];
-              final isAdmin = user['role'] == 'ADMIN';
+          return RefreshIndicator(
+            onRefresh: () => ref.refresh(usersListProvider.future),
+            child: ListView.separated(
+              itemCount: users.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) {
+                final user = users[index];
+                final isAdmin = user['role'] == 'ADMIN';
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: isAdmin ? Colors.purple : Colors.blue,
-                  child: Icon(
-                    isAdmin ? Icons.admin_panel_settings : Icons.person,
-                    color: Colors.white,
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isAdmin ? Colors.purple : Colors.blue,
+                    child: Icon(
+                      isAdmin ? Icons.admin_panel_settings : Icons.person,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                title: Text('${user['name']} (${user['empId']})'),
-                subtitle: Text(isAdmin ? '管理員' : '一般員工'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.grey),
-                  onPressed: () => _confirmDelete(context, ref, user),
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => AddUserScreen(user: user)),
-                  ).then((_) => ref.refresh(usersListProvider));
-                },
-              );
-            },
+                  title: Text('${user['name']} (${user['empId']})'),
+                  subtitle: Text(isAdmin ? '管理員' : '一般員工'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.grey),
+                    onPressed: () => _confirmDelete(context, ref, user),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => AddUserScreen(user: user)),
+                    ).then((_) => ref.refresh(usersListProvider));
+                  },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -79,12 +82,17 @@ class UserListScreen extends ConsumerWidget {
               Navigator.pop(context);
               try {
                 await ref.read(adminServiceProvider).deleteUser(user['id']);
-                ref.refresh(usersListProvider);
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(const SnackBar(content: Text('刪除成功')));
+                ref.invalidate(
+                    usersListProvider); // invalidate is better than refresh for void return
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(const SnackBar(content: Text('刪除成功')));
+                }
               } catch (e) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('刪除失敗: $e')));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('刪除失敗: $e')));
+                }
               }
             },
             child: const Text('刪除', style: TextStyle(color: Colors.red)),

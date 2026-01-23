@@ -138,8 +138,8 @@ class InventoryService {
 
   Future<void> importInventory(File file) async {
     try {
-      String fileName = file.path.split('/').last;
-      FormData formData = FormData.fromMap({
+      final String fileName = file.path.split('/').last;
+      final FormData formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: fileName),
       });
 

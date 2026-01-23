@@ -71,9 +71,9 @@ class FinanceScreen extends ConsumerWidget {
         if (file != null) {
           await financeService.importTransactions(file);
           // Refresh providers
-          ref.refresh(transactionsProvider);
-          ref.refresh(financeSummaryProvider);
-          ref.refresh(monthlyStatsProvider);
+          ref.invalidate(transactionsProvider);
+          ref.invalidate(financeSummaryProvider);
+          ref.invalidate(monthlyStatsProvider);
 
           if (context.mounted) {
             ScaffoldMessenger.of(context)

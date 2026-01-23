@@ -21,48 +21,51 @@ class AttendanceAdminScreen extends ConsumerWidget {
           final sorted = List.from(records);
           sorted.sort((a, b) => b['date'].compareTo(a['date']));
 
-          return ListView.separated(
-            itemCount: sorted.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final r = sorted[index];
-              final user = r['user'] ?? {};
-              final date = DateTime.parse(r['date']).toLocal();
-              final dateStr = DateFormat('yyyy/MM/dd').format(date);
+          return RefreshIndicator(
+            onRefresh: () => ref.refresh(adminAttendanceListProvider.future),
+            child: ListView.separated(
+              itemCount: sorted.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final r = sorted[index];
+                final user = r['user'] ?? {};
+                final date = DateTime.parse(r['date']).toLocal();
+                final dateStr = DateFormat('yyyy/MM/dd').format(date);
 
-              final clockIn = r['clockIn'] != null
-                  ? DateFormat('HH:mm')
-                      .format(DateTime.parse(r['clockIn']).toLocal())
-                  : '--:--';
-              final clockOut = r['clockOut'] != null
-                  ? DateFormat('HH:mm')
-                      .format(DateTime.parse(r['clockOut']).toLocal())
-                  : '--:--';
+                final clockIn = r['clockIn'] != null
+                    ? DateFormat('HH:mm')
+                        .format(DateTime.parse(r['clockIn']).toLocal())
+                    : '--:--';
+                final clockOut = r['clockOut'] != null
+                    ? DateFormat('HH:mm')
+                        .format(DateTime.parse(r['clockOut']).toLocal())
+                    : '--:--';
 
-              // Calculate work duration if both exist
-              String duration = '';
-              if (r['clockIn'] != null && r['clockOut'] != null) {
-                final start = DateTime.parse(r['clockIn']);
-                final end = DateTime.parse(r['clockOut']);
-                final diff = end.difference(start);
-                final h = diff.inHours;
-                final m = diff.inMinutes.remainder(60);
-                duration = '${h}h ${m}m';
-              }
+                // Calculate work duration if both exist
+                String duration = '';
+                if (r['clockIn'] != null && r['clockOut'] != null) {
+                  final start = DateTime.parse(r['clockIn']);
+                  final end = DateTime.parse(r['clockOut']);
+                  final diff = end.difference(start);
+                  final h = diff.inHours;
+                  final m = diff.inMinutes.remainder(60);
+                  duration = '${h}h ${m}m';
+                }
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.blue.shade100,
-                  child: Text(user['name']?.substring(0, 1) ?? '?',
-                      style: TextStyle(color: Colors.blue.shade800)),
-                ),
-                title: Text('${user['name']} ($dateStr)'),
-                subtitle: Text('上班: $clockIn  |  下班: $clockOut'),
-                trailing: Text(duration,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.green)),
-              );
-            },
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue.shade100,
+                    child: Text(user['name']?.substring(0, 1) ?? '?',
+                        style: TextStyle(color: Colors.blue.shade800)),
+                  ),
+                  title: Text('${user['name']} ($dateStr)'),
+                  subtitle: Text('上班: $clockIn  |  下班: $clockOut'),
+                  trailing: Text(duration,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.green)),
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

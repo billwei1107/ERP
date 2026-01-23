@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart'; // for debugPrint
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final fileServiceProvider = Provider((ref) => FileService());
@@ -13,7 +13,7 @@ class FileService {
     // Check permission if needed (Android 13+ handles differently, mostly not needed for picker)
     // Basic implementation
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'csv'],
       );
@@ -22,7 +22,7 @@ class FileService {
         return File(result.files.single.path!);
       }
     } catch (e) {
-      print('Pick file error: $e');
+      debugPrint('Pick file error: $e');
     }
     return null;
   }
@@ -38,7 +38,7 @@ class FileService {
       await Share.shareXFiles([XFile(file.path)],
           text: 'Exported from ERP App');
     } catch (e) {
-      print('Save/Share error: $e');
+      debugPrint('Save/Share error: $e');
       rethrow;
     }
   }

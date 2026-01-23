@@ -80,14 +80,50 @@ export class AttendanceService {
   }
 
   async findAll() {
-    return this.prisma.attendance.findMany({
+    const records = await this.prisma.attendance.findMany({
       orderBy: {
         time: 'desc',
       },
-      take: 100, // Limit to 100 to prevent overload
+      take: 200,
       include: {
         user: true
       }
     });
+
+    const resultMap = new Map<string, any>();
+
+    for (const r of records) {
+      if (!r.user) continue;
+      // Use locally formatted date string for grouping to avoid timezone splits if possible, 
+      // but ISO string date part is consistent enough for now (UTC days).
+      const dateStr = r.time.toISOString().split('T')[0];
+      const key = `${r.userId}_${dateStr}`;
+
+      if (!resultMap.has(key)) {
+        resultMap.set(key, {
+          user: r.user,
+          date: r.time, // Keep one timestamp for sorting/display
+          clockIn: null,
+          clockOut: null
+        });
+      }
+
+      const entry = resultMap.get(key);
+      if (r.type === 'CLOCK_IN') {
+        // If multiple clock-ins, this logic just takes one. 
+        // Since we iterate DESC, this is the LATEST clock-in of the day.
+        // Ideally we want the FIRST clock-in? 
+        // For MVP, handling basic case is sufficient.
+        if (!entry.clockIn || r.time < new Date(entry.clockIn)) {
+          entry.clockIn = r.time;
+        }
+      } else if (r.type === 'CLOCK_OUT') {
+        if (!entry.clockOut || r.time > new Date(entry.clockOut)) {
+          entry.clockOut = r.time;
+        }
+      }
+    }
+
+    return Array.from(resultMap.values());
   }
 }
