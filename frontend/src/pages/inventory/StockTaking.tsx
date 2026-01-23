@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 
 interface StockTakeItem {
+    id?: number;
     productId: number;
     productName: string;
     sku: string;
@@ -100,10 +101,10 @@ export function StockTaking() {
         setViewLocationFilter(''); // Reset filter on open
     };
 
-    const handleActualChange = (productId: number, val: string) => {
+    const handleActualChange = (itemId: number, val: string) => {
         if (!activeTake) return;
         const newItems = activeTake.items.map(item => {
-            if (item.productId === productId) {
+            if (item.id === itemId) {
                 const actual = parseInt(val) || 0;
                 return { ...item, actualStock: actual, difference: actual - item.systemStock };
             }
@@ -306,7 +307,7 @@ export function StockTaking() {
                                                 <Input
                                                     type="number"
                                                     value={item.actualStock}
-                                                    onChange={e => handleActualChange(item.productId, e.target.value)}
+                                                    onChange={e => handleActualChange(item.id!, e.target.value)}
                                                     className="w-full text-center"
                                                 />
                                             )}
