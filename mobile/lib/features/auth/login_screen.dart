@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/features/auth/auth_service.dart';
+import '../../features/others/admin_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -21,6 +22,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final authService = ref.read(authServiceProvider);
       await authService.login(_emailController.text, _passwordController.text);
+
+      // Force refresh user data on login
+      ref.invalidate(currentUserProvider);
+      ref.invalidate(isAdminProvider);
 
       if (mounted) {
         context.go('/home'); // Redirect to new shell route

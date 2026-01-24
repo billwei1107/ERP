@@ -5,6 +5,8 @@ import '../../features/auth/auth_service.dart';
 import 'admin_providers.dart';
 import 'user_list_screen.dart';
 import 'attendance_admin_screen.dart';
+import '../../features/settings/settings_screen.dart';
+import '../../features/settings/settings_provider.dart';
 
 class OthersScreen extends ConsumerWidget {
   const OthersScreen({super.key});
@@ -66,10 +68,9 @@ class OthersScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('個人設定'),
-            onTap: () {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text('功能開發中')));
-            },
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
 
           const Divider(),
@@ -78,6 +79,11 @@ class OthersScreen extends ConsumerWidget {
             title: const Text('登出', style: TextStyle(color: Colors.red)),
             onTap: () async {
               await ref.read(authServiceProvider).logout();
+              ref.invalidate(isAdminProvider);
+              ref.invalidate(currentUserProvider);
+              // Reset theme to system default
+              await ref.read(themeProvider.notifier).reset();
+
               if (context.mounted) {
                 // Assuming '/' is login or redirects to login
                 context.go('/');

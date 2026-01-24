@@ -9,7 +9,7 @@ final adminServiceProvider = Provider((ref) {
 });
 
 // Admin Check Provider
-final isAdminProvider = FutureProvider<bool>((ref) async {
+final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
   final authService = ref.read(authServiceProvider);
   return await authService.isAdmin();
 });

@@ -62,8 +62,37 @@ class AuthService {
     return null;
   }
 
+  Future<void> updateUserSettings(
+      int userId, Map<String, dynamic> settings) async {
+    try {
+      // 1. Call Backend PATCH /users/:id
+      // We need to fetch the current user first to merge settings?
+      // Or does backend merge? Prisma JSON updates usually replace the whole JSON unless carefully handled.
+      // But for now replacing 'settings' object is fine if we send the whole object.
+      // Ideally, we should merge locally or backend should merge.
+      // Let's assume we send { settings: { ... } } and it replaces the `settings` column.
+
+      await _dio.patch('/users/$userId', data: {'settings': settings});
+
+      // 2. Update Local Session
+      final user = await getUser();
+      if (user != null) {
+        user['settings'] = settings;
+        await _storage.write(key: 'user_session', value: jsonEncode(user));
+      }
+    } catch (e) {
+      throw Exception('無法更新設定: $e');
+    }
+  }
+
   Future<bool> isAdmin() async {
     final user = await getUser();
     return user != null && user['role'] == 'ADMIN';
   }
 }
+
+final currentUserProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
+  final authService = ref.watch(authServiceProvider);
+  return authService.getUser();
+});
